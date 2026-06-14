@@ -1,0 +1,24 @@
+/* Sample .cco configuration file */
+
+$typedef.Url: String,
+$enum.Mode = (DEV, STAGING, PROD),
+
+$temp.Server: (
+    host: String,
+    port: Integer = 8080,
+    mode: Mode = DEV
+),
+
+$temp.SecureServer + Server: (
+    cert: String,
+    ssl_port: Integer = 443
+),
+
+app: (
+    name: "libcco-demo",
+    version: 0.1,
+    servers: (
+        #Server("localhost"),
+        #SecureServer("api.example.com", PROD, "/etc/cert.pem")
+    )
+)

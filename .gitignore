@@ -1,0 +1,32 @@
+# Build output
+target/
+*.exe
+*.lib
+*.pdb
+*.ilk
+*.obj
+*.recipe
+*.tlog/
+*.lastbuildstate
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+*.vcxproj
+*.vcxproj.filters
+*.slnx
+*.recipe
+*.bin
+*.log
+
+# Generated docs
+docs/
+html/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp files
+/tmp/
+demo_output.cco
