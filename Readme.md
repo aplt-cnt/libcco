@@ -75,6 +75,10 @@ cmake --build target
 ctest --test-dir target -C Debug
 ```
 
+## Tutorial
+
+A step-by-step CCO syntax tutorial for beginners is available at **[learn/index.md](learn/index.md)** (23 chapters, English).
+
 ## Language Overview
 
 CCO files contain declarations and a root value, separated by commas:

@@ -1,0 +1,39 @@
+/* NOTE: constructor.cco -- Custom constructors example (Chapter 19) */
+
+/* NOTE: base template with default constructor */
+$temp.Point: (
+    x: Integer,
+    y: Integer
+),
+
+/* NOTE: template with custom constructor */
+$temp.Server: (
+    host: String,
+    port: Integer = 8080,
+    url: String = ""
+),
+
+/* NOTE: custom constructor that auto-builds URL */
+$function.@<host: String, port: Integer>: (
+    $this.(host: host, port: port, url: ("https://" + host + ":" + port))
+),
+
+/* NOTE: template with type conversion in constructor */
+$temp.FeatureToggle: (
+    name: String,
+    enabled: Boolean,
+    level: Integer = 0
+),
+
+$function.@<name: String, enabled: Boolean>: (
+    $this.(name: name, enabled: enabled, level: $(enabled | 1))
+),
+
+/* NOTE: instantiation */
+origin: #Point(0, 0),
+
+/* NOTE: using custom constructor */
+s1: #Server("localhost", 8080),
+
+/* NOTE: using custom constructor with type conversion */
+feature: #FeatureToggle("dark-mode", true)

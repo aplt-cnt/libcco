@@ -1,0 +1,19 @@
+/* NOTE: typedef_enum.cco -- Type aliases and enumerations (Chapters 8-10) */
+
+$typedef.Url: String,
+$typedef.Port: Integer,
+$typedef.Timeout: Integer,
+
+$enum.Mode = (DEV, STAGING, PROD),
+$enum.Level = (LOW, MEDIUM, HIGH),
+$enum.Color = (RED, GREEN, BLUE),
+
+app: (
+    name: "my-app",
+    url: "https://example.com",
+    port: 8080,
+    timeout: 30,
+    mode: DEV,
+    level: HIGH,
+    color: GREEN
+)

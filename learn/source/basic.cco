@@ -1,0 +1,45 @@
+/* NOTE: basic.cco -- Basic data types + containers (Chapters 3-7)
+   Demonstrates all primitive types, maps, arrays, nesting, and top-level shorthand. */
+
+/* NOTE: primitive types */
+nothing: None,
+enabled: true,
+disabled: false,
+count: 42,
+hex: 0xFF,
+octal: 0o10,
+binary: 0b1010,
+big: 1_000_000,
+pi: 3.14,
+sci: 6.02e23,
+greeting: "Hello, world!",
+path: "C:\\Program Files\\app",
+raw: `\d+\.\d+`,
+
+/* NOTE: map */
+person: (
+    name: "Alice",
+    age: 30,
+    city: "Beijing"
+),
+
+/* NOTE: empty map */
+empty: (),
+
+/* NOTE: array */
+scores: (95, 87, 92),
+
+/* NOTE: nesting */
+config: (
+    database: (
+        host: "localhost",
+        port: 5432
+    ),
+    cache: (
+        host: "redis.local",
+        port: 6379
+    )
+),
+
+/* NOTE: mixed-type array */
+mixed: (42, "hello", true, None)
