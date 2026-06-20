@@ -2,6 +2,8 @@
 
 A C implementation of the **CCO** (CNT Configuration Object) language — a human-readable, lightweight configuration language designed for clarity, tooling efficiency, and expressive power.
 
+> The project is currently under development. All bugs related to the project can be reported by submitting issues on GitHub, and we will regularly fix the reported problems
+
 ```
 $temp.Endpoint: (
     url: String,
@@ -10,6 +12,14 @@ $temp.Endpoint: (
 
 api: #Endpoint("https://api.example.com", GET)
 ```
+
+| Dimension | JSON | YAML | TOML | HCL | **CCO** |
+|---|---|---|---|---|---|
+| Human Handwriting Friendly | △ | ✅ (but indentation-sensitive) | ✅ | ✅ | ✅ Block-like, natural comments |
+| No Indentation Ambiguity/Injection Risk | ✅ | ⚠️ | ✅ | ✅ | ✅ |
+| "Modeling" capability (type aliases/templates/inheritance) | ✅ (convention only) | ❌ | ❌ | ✅ | ✅ Built-in |
+| Pure C / Zero dependencies / Embedding-friendly | ❌ | ❌ | ❌ | ⚠️ (libucl/hcl ecosystem leans Go) | ✅ Single lib, C11 |
+| Expressions / Derived values | ❌ | ❌ | ❌ | Partial | ✅ Arithmetic/comparison/logical/coalesce |
 
 ## Features
 
