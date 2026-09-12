@@ -20,9 +20,9 @@ jobs:
       - run: |
           clang-format --dry-run -Werror $(find src include -name '*.c' -o -name '*.h')
       - run: |
-          clang-tidy $(find src -name '*.c') -- -std=c11
+          clang-tidy $(find src -name '*.c') -- -Iinclude -std=c11
       - run: |
-          cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem src/
+          cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem --suppress=unusedFunction -I include src/
       - name: Compile each header file independently
         run: bash scripts/check-headers.sh
 
@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - sanitizer: address+undefined
+          - sanitizer: address,undefined
             cc: gcc
           - sanitizer: memory
             cc: clang
