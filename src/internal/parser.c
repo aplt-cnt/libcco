@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "parser.h"
 #include <stdlib.h>
 #include <string.h>
@@ -63,7 +64,7 @@ static cco_object_t* parse_map(cco_parser_context_t* ctx)
         free(key); cco_object_release(val);
         if (err != CCO_OK) { ctx->last_error = err; break; }
         if (ctx->current_token.type == CCO_TOK_COMMA) { advance_token(ctx); }
-        else if (ctx->current_token.type != CCO_TOK_RPAREN && ctx->current_token.type != CCO_TOK_RBRACE && ctx->current_token.type != CCO_TOK_RBRACKET) {
+        else if (ctx->current_token.type != CCO_TOK_RPAREN && ctx->current_token.type != CCO_TOK_RBRACE && ctx->current_token.type != CCO_TOK_RBRACKET && ctx->current_token.type != CCO_TOK_EOF) {
             ctx->last_error = CCO_ERR_PARSE; break;
         }
     }
@@ -83,7 +84,7 @@ static cco_object_t* parse_array(cco_parser_context_t* ctx)
         cco_object_release(val);
         if (err != CCO_OK) { ctx->last_error = err; break; }
         if (ctx->current_token.type == CCO_TOK_COMMA) { advance_token(ctx); }
-        else if (ctx->current_token.type != CCO_TOK_RPAREN && ctx->current_token.type != CCO_TOK_RBRACE && ctx->current_token.type != CCO_TOK_RBRACKET) {
+        else if (ctx->current_token.type != CCO_TOK_RPAREN && ctx->current_token.type != CCO_TOK_RBRACE && ctx->current_token.type != CCO_TOK_RBRACKET && ctx->current_token.type != CCO_TOK_EOF) {
             ctx->last_error = CCO_ERR_PARSE; break;
         }
     }
@@ -169,14 +170,29 @@ static cco_object_t* parse_value(cco_parser_context_t* ctx)
             if (ctx->current_token.type == CCO_TOK_RPAREN) advance_token(ctx);
             break;
         case CCO_TOK_LBRACE:
-            advance_token(ctx);
-            result = parse_map(ctx);
-            if (ctx->current_token.type == CCO_TOK_RBRACE) advance_token(ctx);
-            break;
         case CCO_TOK_LBRACKET:
+            if (!ctx->options->lenient_brackets) {
+                cco_diag_record(CCO_ERR_PARSE, ctx->current_token.line, ctx->current_token.col, "parse_value", "Invalid bracket. CCO strictly uses ()");
+                ctx->last_error = CCO_ERR_PARSE;
+                break;
+            }
+            
+            /* Auto-correct by treating as LPAREN, but expect the matching close bracket */
+            /* We use a diagnostic info record to log the correction */
+            cco_diag_record(CCO_OK, ctx->current_token.line, ctx->current_token.col, "parse_value", "Warning: JSON-style brackets auto-corrected to ()");
+            
+            cco_token_type_t expected_close = (ctx->current_token.type == CCO_TOK_LBRACE) ? CCO_TOK_RBRACE : CCO_TOK_RBRACKET;
             advance_token(ctx);
-            result = parse_array(ctx);
-            if (ctx->current_token.type == CCO_TOK_RBRACKET) advance_token(ctx);
+            
+            if (ctx->current_token.type == CCO_TOK_IDENTIFIER && ctx->next_token.type == CCO_TOK_COLON) {
+                result = parse_map(ctx);
+            } else if (ctx->current_token.type == expected_close) {
+                result = parse_map(ctx);
+            } else {
+                result = parse_array(ctx);
+            }
+            
+            if (ctx->current_token.type == expected_close) advance_token(ctx);
             break;
         default:
             cco_diag_record(CCO_ERR_PARSE, ctx->current_token.line, ctx->current_token.col, "parse_value", "Unexpected token");

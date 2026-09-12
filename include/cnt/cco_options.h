@@ -13,6 +13,7 @@ typedef struct {
     size_t max_steps;
 
     bool allow_colon_instantiation;
+    bool lenient_brackets;
     bool strict_typing;
     bool restrict_filesystem;
     const char* base_dir;

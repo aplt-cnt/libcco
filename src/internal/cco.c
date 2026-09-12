@@ -19,6 +19,7 @@ void cco_parse_options_init(cco_parse_options_t* opts)
     opts->max_instantiations = 1000;
     opts->max_steps = 10000;
     opts->allow_colon_instantiation = true;
+    opts->lenient_brackets = true;
     opts->strict_typing = true;
     opts->restrict_filesystem = true;
     opts->base_dir = ".";

@@ -5,10 +5,10 @@
 
 int main(void) {
     const char* invalid_text = 
-        "server: {\n"
+        "server: (\n"
         "    host: \"127.0.0.1\",\n"
         "    port  8080\n" /* Missing colon */
-        "}\n";
+        ")\n";
 
     printf("Attempting to parse invalid configuration...\n");
     cco_object_t* config = cco_parse_string(invalid_text, strlen(invalid_text), NULL);

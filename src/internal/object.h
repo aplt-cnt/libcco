@@ -3,19 +3,11 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <cnt/cco.h>
 #include <stdint.h>
 #include <cnt/cco_error.h>
 
-typedef enum {
-    CCO_TYPE_NONE = 0,
-    CCO_TYPE_BOOLEAN,
-    CCO_TYPE_INTEGER,
-    CCO_TYPE_FLOAT,
-    CCO_TYPE_STRING,
-    CCO_TYPE_ARRAY,
-    CCO_TYPE_MAP,
-    CCO_TYPE_TEMPLATE_INSTANCE
-} cco_type_t;
+typedef int cco_type_t; /* enum deleted */
 
 typedef struct cco_object_s cco_object_t;
 
