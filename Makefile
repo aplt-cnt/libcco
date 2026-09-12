@@ -218,7 +218,7 @@ examples: ## Build one example: make examples name=<file>
 tests: build.debug ## Build and run the test suite
 	@if [ -f $(TEST_DIR)/Makefile ]; then \
 		$(STEP) "delegate to $(TEST_DIR)/Makefile"; \
-		$(MAKE) -C $(TEST_DIR); \
+		$(MAKE) -C $(TEST_DIR) CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)"; \
 	elif [ -n "$$(find $(TEST_DIR) -maxdepth 1 -name '*.c' -o -name '*.cc' -o -name '*.cpp' 2>/dev/null | head -n1)" ]; then \
 		mkdir -p $(BUILD_DIR)/debug/tests; \
 		$(STEP) "build tests"; \

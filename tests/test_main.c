@@ -1,22 +1,33 @@
-#include <cnt/cco.h>
+#include "test.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
 
-void test_arena_initialization(void) {
-    printf("Running test_arena_initialization...\n");
-    cco_object_t* obj = cco_parse_string("true", 4, NULL);
-    if (!obj) {
-        printf("Parse error: %d\n", cco_get_last_error());
-    }
-    assert(obj != NULL);
-    cco_object_release(obj);
-    printf("Passed test_arena_initialization.\n");
-}
+int tests_run = 0;
+int tests_passed = 0;
+
+/* Declare test suites */
+extern void test_arena(void);
+extern void test_strbuf(void);
+extern void test_lexer(void);
+extern void test_parser(void);
 
 int main(void) {
     printf("Starting libcco unit tests...\n");
-    test_arena_initialization();
-    printf("All tests passed successfully.\n");
-    return EXIT_SUCCESS;
+
+    test_arena();
+    test_strbuf();
+    test_lexer();
+    test_parser();
+
+    printf("========================================\n");
+    printf("Tests run:    %d\n", tests_run);
+    printf("Tests passed: %d\n", tests_passed);
+    printf("Tests failed: %d\n", tests_run - tests_passed);
+
+    if (tests_run == tests_passed) {
+        printf("SUCCESS!\n");
+        return 0;
+    } else {
+        printf("FAILURE!\n");
+        return 1;
+    }
 }
