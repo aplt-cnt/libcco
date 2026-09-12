@@ -1,0 +1,20 @@
+# Style is based on Google, with two project-specific overrides:
+#   - Allman brace style (opening brace on its own line).
+#   - 4-space indentation.
+BasedOnStyle: Google
+BreakBeforeBraces: Allman
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 80
+PointerAlignment: Left
+DerivePointerAlignment: false
+AllowShortFunctionsOnASingleLine: Empty
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^"'
+    Priority: 1
+  - Regex: '^<[a-z_]+\.h>'
+    Priority: 2
+  - Regex: '^<.*>'
+    Priority: 3

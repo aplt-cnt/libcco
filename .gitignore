@@ -1,0 +1,29 @@
+# Credentials
+.env
+.env.*
+*.pem
+*.key
+credentials.*
+secrets.*
+
+# Build artifacts
+build/
+build-*/
+*.o
+*.a
+*.so
+*.dylib
+
+# Testing and Coverage
+coverage/
+*.gcda
+*.gcno
+Testing/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# System
+.DS_Store

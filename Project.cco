@@ -1,0 +1,15 @@
+(
+    name: "libcco",
+    version: "1.0.0",
+    author: (
+        "CNT DT. <cnt@aplt.top>"
+    ),
+    license: "Apache 2.0",
+    language: C,
+    standards: ["cps-1.0", "C11"],
+    dependencies: [],
+    build: (
+        #Builder("cmake", "minimum_version:3.20"),
+        #Builder("make", None)
+    )
+)

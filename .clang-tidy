@@ -1,0 +1,10 @@
+---
+Checks: >
+  clang-analyzer-*,
+  cert-*,
+  bugprone-*,
+  performance-*,
+  -readability-avoid-goto,
+  -bugprone-easily-swappable-parameters
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'

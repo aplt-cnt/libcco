@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1">
+  <settings>
+    <enable>all</enable>
+    <error-exitcode>1</error-exitcode>
+    <suppressions>
+      <suppress>missingIncludeSystem</suppress>
+    </suppressions>
+  </settings>
+</project>

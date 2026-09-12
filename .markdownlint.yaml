@@ -1,0 +1,13 @@
+# Markdownlint configuration for libcco.
+# https://github.com/DavidAnson/markdownlint
+
+default: true
+
+# Line length: tables and code fences in docs frequently exceed 80 columns.
+MD013: false
+
+# Inline HTML: needed for the project-structure tree in README.
+MD033: false
+
+# First line in file: some ADR files start with a level-2 heading.
+MD041: false
