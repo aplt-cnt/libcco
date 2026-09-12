@@ -2,10 +2,13 @@
 #define CNT_CCO_INTERNAL_STRBUF_H
 
 #include <stddef.h>
+
 #include <cnt/cco_error.h>
+
 #include "arena.h"
 
-typedef struct {
+typedef struct
+{
     char* data;
     size_t length;
     size_t capacity;

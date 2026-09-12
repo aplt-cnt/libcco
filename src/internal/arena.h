@@ -5,14 +5,16 @@
 
 typedef struct cco_arena_block_s cco_arena_block_t;
 
-struct cco_arena_block_s {
+struct cco_arena_block_s
+{
     cco_arena_block_t* next;
     size_t capacity;
     size_t used;
     unsigned char data[];
 };
 
-typedef struct cco_arena_s {
+typedef struct cco_arena_s
+{
     cco_arena_block_t* head;
     size_t total_allocated;
     size_t max_allocation_limit;

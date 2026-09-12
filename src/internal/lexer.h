@@ -2,11 +2,14 @@
 #define CNT_CCO_INTERNAL_LEXER_H
 
 #include <stddef.h>
+
 #include <cnt/cco_error.h>
 #include <cnt/cco_options.h>
+
 #include "strbuf.h"
 
-typedef enum {
+typedef enum
+{
     CCO_TOK_EOF = 0,
     CCO_TOK_LPAREN,
     CCO_TOK_RPAREN,
@@ -34,7 +37,7 @@ typedef enum {
     CCO_TOK_DOT,
     CCO_TOK_HASH,
     CCO_TOK_DOLLAR,
-    
+
     CCO_TOK_NONE,
     CCO_TOK_TRUE,
     CCO_TOK_FALSE,
@@ -46,7 +49,8 @@ typedef enum {
     CCO_TOK_COMMENT
 } cco_token_type_t;
 
-typedef struct {
+typedef struct
+{
     cco_token_type_t type;
     size_t line;
     size_t col;
@@ -54,7 +58,8 @@ typedef struct {
     size_t text_len;
 } cco_token_t;
 
-typedef struct {
+typedef struct
+{
     const char* src;
     size_t src_len;
     size_t pos;
@@ -64,7 +69,8 @@ typedef struct {
     cco_strbuf_t scratch_buf; /* For building unescaped strings */
 } cco_lexer_t;
 
-void cco_lexer_init(cco_lexer_t* lexer, const char* src, size_t src_len, const cco_parse_options_t* opts, cco_arena_t* arena);
+void cco_lexer_init(cco_lexer_t* lexer, const char* src, size_t src_len,
+                    const cco_parse_options_t* opts, cco_arena_t* arena);
 
 /* Scans the next token. If EOF is reached, type is set to CCO_TOK_EOF.
    Returns CCO_OK on success, or an error code on invalid characters. */

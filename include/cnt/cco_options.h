@@ -1,10 +1,11 @@
 #ifndef CNT_CCO_OPTIONS_H
 #define CNT_CCO_OPTIONS_H
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
-typedef struct {
+typedef struct
+{
     size_t max_depth;
     size_t max_string_length;
     size_t max_document_size;

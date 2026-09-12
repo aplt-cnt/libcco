@@ -7,7 +7,8 @@
 
 void cco_arena_init(cco_arena_t* a, size_t max_limit)
 {
-    if (a) {
+    if (a)
+    {
         a->head = NULL;
         a->total_allocated = 0;
         a->max_allocation_limit = max_limit;
@@ -17,17 +18,21 @@ void cco_arena_init(cco_arena_t* a, size_t max_limit)
 static cco_arena_block_t* cco_arena_alloc_block(size_t min_capacity)
 {
     size_t capacity = ARENA_DEFAULT_BLOCK_SIZE;
-    if (min_capacity > capacity) {
+    if (min_capacity > capacity)
+    {
         capacity = min_capacity;
     }
-    
+
     /* Check for overflow in struct size + capacity */
-    if (SIZE_MAX - sizeof(cco_arena_block_t) < capacity) {
+    if (SIZE_MAX - sizeof(cco_arena_block_t) < capacity)
+    {
         return NULL;
     }
-    
-    cco_arena_block_t* block = (cco_arena_block_t*)malloc(sizeof(cco_arena_block_t) + capacity);
-    if (block) {
+
+    cco_arena_block_t* block =
+        (cco_arena_block_t*)malloc(sizeof(cco_arena_block_t) + capacity);
+    if (block)
+    {
         block->next = NULL;
         block->capacity = capacity;
         block->used = 0;
@@ -37,29 +42,37 @@ static cco_arena_block_t* cco_arena_alloc_block(size_t min_capacity)
 
 void* cco_arena_alloc(cco_arena_t* restrict a, size_t n)
 {
-    if (!a || n == 0) {
+    if (!a || n == 0)
+    {
         return NULL;
     }
 
     /* Alignment padding (8 bytes alignment) */
     size_t padding = (8 - (n % 8)) % 8;
-    if (SIZE_MAX - padding < n) {
+    if (SIZE_MAX - padding < n)
+    {
         return NULL;
     }
     size_t aligned_n = n + padding;
 
     /* Check total limit */
-    if (a->max_allocation_limit > 0 && SIZE_MAX - a->total_allocated < aligned_n) {
+    if (a->max_allocation_limit > 0 &&
+        SIZE_MAX - a->total_allocated < aligned_n)
+    {
         return NULL;
     }
-    if (a->max_allocation_limit > 0 && a->total_allocated + aligned_n > a->max_allocation_limit) {
+    if (a->max_allocation_limit > 0 &&
+        a->total_allocated + aligned_n > a->max_allocation_limit)
+    {
         return NULL; /* Limit exceeded */
     }
 
-    if (!a->head || a->head->used + aligned_n > a->head->capacity) {
+    if (!a->head || a->head->used + aligned_n > a->head->capacity)
+    {
         /* Allocate new block */
         cco_arena_block_t* new_block = cco_arena_alloc_block(aligned_n);
-        if (!new_block) {
+        if (!new_block)
+        {
             return NULL;
         }
         new_block->next = a->head;
@@ -75,9 +88,11 @@ void* cco_arena_alloc(cco_arena_t* restrict a, size_t n)
 
 void cco_arena_destroy(cco_arena_t* a)
 {
-    if (a) {
+    if (a)
+    {
         cco_arena_block_t* curr = a->head;
-        while (curr) {
+        while (curr)
+        {
             cco_arena_block_t* next = curr->next;
             free(curr);
             curr = next;

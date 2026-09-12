@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        cc: [gcc-13, clang-16]
+        cc: [gcc, clang]
     steps:
       - uses: actions/checkout@v4
       - run: make build CC=${{ matrix.cc }}
@@ -39,10 +39,14 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        sanitizer: [address+undefined, memory]
+        include:
+          - sanitizer: address+undefined
+            cc: gcc
+          - sanitizer: memory
+            cc: clang
     steps:
       - uses: actions/checkout@v4
-      - run: make tests SANITIZER=${{ matrix.sanitizer }}
+      - run: make tests SANITIZER=${{ matrix.sanitizer }} CC=${{ matrix.cc }}
 
   coverage:
     runs-on: ubuntu-22.04
