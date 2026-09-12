@@ -28,6 +28,8 @@ option(CCO_ENABLE_CONSTRUCTORS "Enable constructors" ON)
 set(SOURCES
     src/internal/arena.c
     src/internal/strbuf.c
+    src/internal/hash.c
+    src/internal/diag.c
 )
 
 add_library(cco STATIC ${SOURCES})
