@@ -1,0 +1,51 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  api-doc-check:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/check-api-doc.sh
+
+  lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y clang-format clang-tidy cppcheck
+      - run: |
+          clang-format --dry-run -Werror $(find src include -name '*.c' -o -name '*.h')
+      - run: |
+          clang-tidy $(find src -name '*.c') -- -std=c11
+      - run: |
+          cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem src/
+      - name: Compile each header file independently
+        run: bash scripts/check-headers.sh
+
+  build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        cc: [gcc-13, clang-16]
+    steps:
+      - uses: actions/checkout@v4
+      - run: make build CC=${{ matrix.cc }}
+
+  test:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        sanitizer: [address+undefined, memory]
+    steps:
+      - uses: actions/checkout@v4
+      - run: make test SANITIZER=${{ matrix.sanitizer }}
+
+  security:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Core zero dependencies, no SCA required"
