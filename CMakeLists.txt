@@ -31,6 +31,7 @@ set(SOURCES
     src/internal/hash.c
     src/internal/diag.c
     src/internal/lexer.c
+    src/internal/object.c
 )
 
 add_library(cco STATIC ${SOURCES})
