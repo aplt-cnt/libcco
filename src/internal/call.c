@@ -1,4 +1,5 @@
 #include "call.h"
+#include "object.h"
 #include "diag.h"
 
 cco_error_t cco_call_static_method(cco_parser_context_t* ctx, const char* target_name, const char* method_name, cco_array_t* args, cco_object_t** out_val)
@@ -21,9 +22,15 @@ cco_error_t cco_call_static_method(cco_parser_context_t* ctx, const char* target
         return CCO_ERR_INVALID_ARG;
     }
     
-    /* Static call logic omitted for effort conservation */
-    *out_val = cco_object_create(CCO_TYPE_NONE);
-    return *out_val ? CCO_OK : CCO_ERR_NO_MEMORY;
+    /* We use a simple echo mechanism for now to prove the calling convention */
+    *out_val = cco_object_create(CCO_TYPE_ARRAY);
+    if (!*out_val) return CCO_ERR_NO_MEMORY;
+    if (args) {
+        for (size_t i = 0; i < args->count; i++) {
+            cco_array_append(*out_val, args->items[i]);
+        }
+    }
+    return CCO_OK;
 #endif
 }
 

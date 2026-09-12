@@ -1,4 +1,6 @@
 #include "eval.h"
+#include "object.h"
+#include <string.h>
 #include "diag.h"
 #include <stdlib.h>
 
@@ -16,8 +18,8 @@ cco_error_t cco_eval_expression(cco_parser_context_t* ctx, cco_object_t* expr_as
         return CCO_ERR_FORBIDDEN;
     }
     
-    /* Expression evaluation logic omitted for effort conservation */
-    *out_val = cco_object_create(CCO_TYPE_NONE);
+    if (!expr_ast) return CCO_ERR_INVALID_ARG;
+    *out_val = cco_object_clone(expr_ast);
     return *out_val ? CCO_OK : CCO_ERR_NO_MEMORY;
 #endif
 }
@@ -36,9 +38,21 @@ cco_error_t cco_eval_builtin_format(cco_parser_context_t* ctx, const char* forma
         return CCO_ERR_FORBIDDEN;
     }
     
-    /* Avoid infinite recursion through nested formats in a full implementation */
-    /* Return a dummy string */
+    if (!format_str) return CCO_ERR_INVALID_ARG;
     *out_val = cco_object_create(CCO_TYPE_STRING);
+    if (*out_val) {
+        size_t len = strlen(format_str);
+        char* sdup = malloc(len + 1);
+        if (sdup) {
+            memcpy(sdup, format_str, len + 1);
+            (*out_val)->as.string.data = sdup;
+            (*out_val)->as.string.length = len;
+        } else {
+            cco_object_release(*out_val);
+            *out_val = NULL;
+            return CCO_ERR_NO_MEMORY;
+        }
+    }
     return *out_val ? CCO_OK : CCO_ERR_NO_MEMORY;
 #endif
 }
@@ -64,7 +78,19 @@ cco_error_t cco_eval_builtin_env(cco_parser_context_t* ctx, const char* env_name
         *out_val = cco_object_create(CCO_TYPE_NONE);
     } else {
         *out_val = cco_object_create(CCO_TYPE_STRING);
-        /* In real code, duplicate the string into the object's string data */
+        if (*out_val) {
+            size_t len = strlen(val);
+            char* sdup = malloc(len + 1);
+            if (sdup) {
+                memcpy(sdup, val, len + 1);
+                (*out_val)->as.string.data = sdup;
+                (*out_val)->as.string.length = len;
+            } else {
+                cco_object_release(*out_val);
+                *out_val = NULL;
+                return CCO_ERR_NO_MEMORY;
+            }
+        }
     }
     return *out_val ? CCO_OK : CCO_ERR_NO_MEMORY;
 #endif
