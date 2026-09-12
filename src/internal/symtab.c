@@ -46,7 +46,7 @@ cco_error_t cco_symtab_add_typedef(cco_symtab_t* symtab, const char* name,
 }
 
 cco_error_t cco_symtab_add_enum(cco_symtab_t* symtab, const char* name,
-                                cco_enum_def_t* def)
+                                const cco_enum_def_t* def)
 {
     if (!symtab || !name || !def)
         return CCO_ERR_INVALID_ARG;

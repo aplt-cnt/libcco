@@ -38,7 +38,7 @@ cco_error_t cco_symtab_add_typedef(cco_symtab_t* symtab, const char* name,
 
 /* Enum registration */
 cco_error_t cco_symtab_add_enum(cco_symtab_t* symtab, const char* name,
-                                cco_enum_def_t* def);
+                                const cco_enum_def_t* def);
 
 /* Template registration with inheritance cycle detection */
 cco_error_t cco_symtab_add_template(cco_symtab_t* symtab, const char* name,
