@@ -24,10 +24,13 @@ option(CCO_ENABLE_ENV "Enable $env builtin" OFF)
 option(CCO_ENABLE_STATIC_CALLS "Enable static calls" ON)
 option(CCO_ENABLE_CONSTRUCTORS "Enable constructors" ON)
 
-# Source files (dummy to allow compilation without warnings)
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/dummy.c "int cco_dummy_variable_for_compilation = 0;")
+# Source files
+set(SOURCES
+    src/internal/arena.c
+    src/internal/strbuf.c
+)
 
-add_library(cco STATIC ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
+add_library(cco STATIC ${SOURCES})
 target_include_directories(cco PUBLIC include PRIVATE src)
 
 # Add custom target for linting
