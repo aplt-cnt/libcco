@@ -1,16 +1,238 @@
-.PHONY: all build clean lint test
+# ============================================================================
+#  Generic Makefile
+#  Usage: make help
+# ============================================================================
 
-all: build
+SHELL := /bin/bash
 
-build:
-	cmake -B build
-	cmake --build build
+# --- project ----------------------------------------------------------------
+PROJECT     ?= $(notdir $(CURDIR))
+DESCRIPTION ?= $(PROJECT)
+SRC_DIR     ?= src
+TEST_DIR    ?= tests
+INC_DIR     ?= include
+EXAMPLE_DIR ?= examples
+BUILD_DIR   ?= build
+DOCS_DIR    ?= docs
+DOXYFILE    ?= Doxyfile
+BIN         ?= $(PROJECT)
 
-clean:
-	rm -rf build
+# --- install ----------------------------------------------------------------
+PREFIX  ?= /usr/local
+DESTDIR ?=
 
-lint:
-	clang-format --dry-run -Werror include/cnt/*.h src/internal/*.c src/internal/*.h test/*.c 2>/dev/null || true
+# --- toolchain --------------------------------------------------------------
+CC       ?= cc
+CXX      ?= c++
+AR       ?= ar
+CSTD     ?= c11
+CXXSTD   ?= c++17
+WARN     ?= -Wall -Wextra -Wpedantic
+CFLAGS   ?=
+CXXFLAGS ?=
+CPPFLAGS += -I$(INC_DIR)
+LDFLAGS  ?=
+LDLIBS   ?=
 
-test: build
-	cd build && ctest
+OPT_DEBUG   ?= -O0 -g3 -DDEBUG
+OPT_RELEASE ?= -O2 -DNDEBUG
+
+# --- ansi -------------------------------------------------------------------
+RESET  := \033[0m
+BOLD   := \033[1m
+DIM    := \033[2m
+CYAN   := \033[36m
+GREEN  := \033[32m
+YELLOW := \033[33m
+RED    := \033[31m
+
+STEP = printf '$(CYAN)$(BOLD)==>$(RESET) %s\n'
+OK   = printf '$(GREEN)$(BOLD)  ok$(RESET) %s\n'
+WARN = printf '$(YELLOW)warn:$(RESET) %s\n'
+ERR  = printf '$(RED)$(BOLD)error:$(RESET) %s\n'
+
+# --- sources ----------------------------------------------------------------
+SRCS      := $(shell find $(SRC_DIR) -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.cxx' \) 2>/dev/null | sort)
+MAIN_SRCS := $(wildcard $(SRC_DIR)/main.c $(SRC_DIR)/main.cc $(SRC_DIR)/main.cpp $(SRC_DIR)/main.cxx)
+LIB_SRCS  := $(filter-out $(MAIN_SRCS),$(SRCS))
+CXX_SRCS  := $(filter %.cc %.cpp %.cxx,$(SRCS))
+
+IS_LIBRARY := $(if $(MAIN_SRCS),0,1)
+LD         := $(if $(CXX_SRCS),$(CXX),$(CC))
+
+MODE ?= debug
+ifeq ($(MODE),release)
+OPT := $(OPT_RELEASE)
+else
+OPT := $(OPT_DEBUG)
+endif
+
+OBJ_DIR := $(BUILD_DIR)/$(MODE)/obj
+OBJS    := $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%.o,$(SRCS))
+DEPS    := $(OBJS:.o=.d)
+
+TARGET_OF = $(BUILD_DIR)/$(1)/$(if $(filter 1,$(IS_LIBRARY)),lib$(BIN).a,$(BIN))
+TARGET    := $(call TARGET_OF,$(MODE))
+
+# --- object rules -----------------------------------------------------------
+$(OBJ_DIR)/%.c.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	@$(STEP) "$<"
+	@$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=$(CSTD) $(OPT) -MMD -MP -c $< -o $@
+
+$(OBJ_DIR)/%.cc.o: $(SRC_DIR)/%.cc
+	@mkdir -p $(dir $@)
+	@$(STEP) "$<"
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(WARN) -std=$(CXXSTD) $(OPT) -MMD -MP -c $< -o $@
+
+$(OBJ_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	@$(STEP) "$<"
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(WARN) -std=$(CXXSTD) $(OPT) -MMD -MP -c $< -o $@
+
+$(OBJ_DIR)/%.cxx.o: $(SRC_DIR)/%.cxx
+	@mkdir -p $(dir $@)
+	@$(STEP) "$<"
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(WARN) -std=$(CXXSTD) $(OPT) -MMD -MP -c $< -o $@
+
+ifeq ($(IS_LIBRARY),1)
+LINK = $(AR) rcs $@ $^
+else
+LINK = $(LD) $^ $(LDFLAGS) $(LDLIBS) -o $@
+endif
+
+$(TARGET): $(OBJS)
+	@mkdir -p $(dir $@)
+	@$(STEP) "link $@"
+	@$(LINK)
+
+-include $(DEPS)
+
+# ============================================================================
+#  Targets
+# ============================================================================
+
+.DEFAULT_GOAL := help
+.PHONY: help build build.debug build.release run examples tests clean docs lint install uninstall
+
+##@ General
+
+help: ## Show this help
+	@printf '\n'
+	@printf '  $(BOLD)%s$(RESET)\n' '$(PROJECT)'
+	@printf '  $(DIM)%s$(RESET)\n' '$(DESCRIPTION)'
+	@awk 'BEGIN {FS = ":.*##"} \
+		/^##@/ { printf "\n\033[1;33m  %s\033[0m\n", substr($$0, 5); next } \
+		/^[a-zA-Z0-9_.-]+:.*?##/ { \
+			msg = $$2; sub(/^[ \t]*/, "", msg); \
+			printf "  \033[36m%-22s\033[0m \033[2m%s\033[0m\n", $$1, msg \
+		}' $(MAKEFILE_LIST)
+	@printf '\n'
+
+##@ Build
+
+build: build.debug ## Build debug binary (alias of build.debug)
+
+build.debug: ## Compile with debug flags
+	@$(MAKE) --no-print-directory $(call TARGET_OF,debug) MODE=debug
+	@$(OK) "$(call TARGET_OF,debug)"
+
+build.release: ## Compile with release flags
+	@$(MAKE) --no-print-directory $(call TARGET_OF,release) MODE=release
+	@$(OK) "$(call TARGET_OF,release)"
+
+##@ Run
+
+run: build.debug ## Run the debug binary (ARGS="..." to pass arguments)
+	@if [ "$(IS_LIBRARY)" = "1" ]; then \
+		$(WARN) "library project, nothing to run"; \
+	else \
+		$(STEP) "run $(BIN)"; \
+		$(BUILD_DIR)/debug/$(BIN) $(ARGS); \
+	fi
+
+examples: ## Build one example: make examples name=<file>
+	@if [ -z "$(name)" ]; then \
+		printf 'usage: make examples name=<file>\n\n'; \
+		printf 'available:\n'; \
+		find $(EXAMPLE_DIR) -maxdepth 1 -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' \) 2>/dev/null \
+			| sed 's|.*/||; s|\.[^.]*$$||' | sort | sed 's|^|  |'; \
+		exit 0; \
+	fi; \
+	src=$$(ls $(EXAMPLE_DIR)/$(name).c $(EXAMPLE_DIR)/$(name).cc $(EXAMPLE_DIR)/$(name).cpp 2>/dev/null | head -n1); \
+	if [ -z "$$src" ]; then $(ERR) "no such example: $(name)"; exit 1; fi; \
+	comp="$(CC)"; case "$$src" in *.c) ;; *) comp="$(CXX)";; esac; \
+	mkdir -p $(BUILD_DIR)/examples; \
+	$(STEP) "build $$src"; \
+	$$comp $(CPPFLAGS) $(WARN) $(OPT) $$src $(LIB_SRCS) $(LDFLAGS) $(LDLIBS) -o $(BUILD_DIR)/examples/$(name); \
+	$(OK) "$(BUILD_DIR)/examples/$(name)"
+
+##@ Quality
+
+tests: build.debug ## Build and run the test suite
+	@if [ -f $(TEST_DIR)/Makefile ]; then \
+		$(STEP) "delegate to $(TEST_DIR)/Makefile"; \
+		$(MAKE) -C $(TEST_DIR); \
+	elif ls $(TEST_DIR)/*.c $(TEST_DIR)/*.cc $(TEST_DIR)/*.cpp >/dev/null 2>&1; then \
+		mkdir -p $(BUILD_DIR)/debug/tests; \
+		$(STEP) "build tests"; \
+		$(LD) $(CPPFLAGS) $(WARN) $(OPT) $(TEST_DIR)/*.c $(TEST_DIR)/*.cc $(TEST_DIR)/*.cpp $(LIB_SRCS) $(LDFLAGS) $(LDLIBS) -o $(BUILD_DIR)/debug/tests/run 2>/dev/null || \
+		{ $(ERR) "test build failed"; exit 1; }; \
+		$(STEP) "run tests"; \
+		$(BUILD_DIR)/debug/tests/run; \
+	else \
+		$(WARN) "no tests found in $(TEST_DIR)/"; \
+	fi
+
+lint: ## Run static analysis on the sources
+	@if command -v cppcheck >/dev/null 2>&1; then \
+		$(STEP) "cppcheck"; \
+		cppcheck --enable=warning,style,performance --inline-suppr --quiet $(SRCS) || exit 1; \
+		$(OK) "cppcheck clean"; \
+	elif command -v clang-tidy >/dev/null 2>&1; then \
+		$(STEP) "clang-tidy"; \
+		clang-tidy $(SRCS) -- $(CPPFLAGS) || exit 1; \
+		$(OK) "clang-tidy clean"; \
+	else \
+		$(ERR) "no linter found (install cppcheck or clang-tidy)"; exit 1; \
+	fi
+
+##@ Documentation
+
+docs: ## Generate API documentation with Doxygen
+	@if ! command -v doxygen >/dev/null 2>&1; then $(ERR) "doxygen not found"; exit 1; fi; \
+	if [ ! -f $(DOXYFILE) ]; then $(ERR) "$(DOXYFILE) missing, run: doxygen -g $(DOXYFILE)"; exit 1; fi; \
+	$(STEP) "doxygen $(DOXYFILE)"; \
+	doxygen $(DOXYFILE) >/dev/null; \
+	$(OK) "$(DOCS_DIR)/html/index.html"
+
+##@ Install
+
+install: build.release ## Install artifacts under $(DESTDIR)$(PREFIX)
+	@if [ "$(IS_LIBRARY)" = "1" ]; then \
+		install -d $(DESTDIR)$(PREFIX)/lib; \
+		install -m 644 $(call TARGET_OF,release) $(DESTDIR)$(PREFIX)/lib/; \
+		$(OK) "$(DESTDIR)$(PREFIX)/lib/$(notdir $(call TARGET_OF,release))"; \
+	else \
+		install -d $(DESTDIR)$(PREFIX)/bin; \
+		install -m 755 $(call TARGET_OF,release) $(DESTDIR)$(PREFIX)/bin/$(BIN); \
+		$(OK) "$(DESTDIR)$(PREFIX)/bin/$(BIN)"; \
+	fi
+	@if [ -d $(INC_DIR) ]; then \
+		install -d $(DESTDIR)$(PREFIX)/include/$(PROJECT); \
+		cp -R $(INC_DIR)/. $(DESTDIR)$(PREFIX)/include/$(PROJECT)/; \
+		$(OK) "$(DESTDIR)$(PREFIX)/include/$(PROJECT)"; \
+	fi
+
+uninstall: ## Remove installed artifacts
+	@rm -f $(DESTDIR)$(PREFIX)/bin/$(BIN)
+	@rm -f $(DESTDIR)$(PREFIX)/lib/lib$(BIN).a
+	@rm -rf $(DESTDIR)$(PREFIX)/include/$(PROJECT)
+	@$(OK) "uninstalled $(PROJECT)"
+
+##@ Clean
+
+clean: ## Remove all build artifacts
+	@$(STEP) "remove $(BUILD_DIR)"
+	@rm -rf $(BUILD_DIR)
+	@$(OK) "clean"

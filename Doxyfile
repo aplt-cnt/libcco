@@ -1,0 +1,14 @@
+PROJECT_NAME           = "libcco"
+PROJECT_NUMBER         = "0.1.0"
+PROJECT_BRIEF          = "CCO configuration object parsing and serialization library"
+OUTPUT_DIRECTORY       = docs
+INPUT                  = include src/internal
+FILE_PATTERNS          = *.h *.c *.hpp *.cpp
+RECURSIVE              = YES
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+WARNINGS               = YES
