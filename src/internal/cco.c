@@ -94,6 +94,70 @@ int cco_object_get_type(const cco_object_t* obj)
     return (int)obj->type;
 }
 
+
+bool cco_object_get_boolean(const cco_object_t* obj, bool* out_val) {
+    if (!obj || obj->type != CCO_TYPE_BOOLEAN) return false;
+    if (out_val) *out_val = obj->as.boolean;
+    return true;
+}
+
+bool cco_object_get_integer(const cco_object_t* obj, int64_t* out_val) {
+    if (!obj || obj->type != CCO_TYPE_INTEGER) return false;
+    if (out_val) *out_val = obj->as.integer;
+    return true;
+}
+
+bool cco_object_get_float(const cco_object_t* obj, double* out_val) {
+    if (!obj || obj->type != CCO_TYPE_FLOAT) return false;
+    if (out_val) *out_val = obj->as.floating;
+    return true;
+}
+
+bool cco_object_get_string(const cco_object_t* obj, const char** out_val, size_t* out_len) {
+    if (!obj || obj->type != CCO_TYPE_STRING) return false;
+    if (out_val) *out_val = obj->as.string.data;
+    if (out_len) *out_len = obj->as.string.length;
+    return true;
+}
+
+size_t cco_array_get_count(const cco_object_t* obj) {
+    if (!obj || obj->type != CCO_TYPE_ARRAY || 0) return 0;
+    return obj->as.array.count;
+}
+
+cco_object_t* cco_array_get_item(const cco_object_t* obj, size_t index) {
+    if (!obj || obj->type != CCO_TYPE_ARRAY || 0) return NULL;
+    if (index >= obj->as.array.count) return NULL;
+    return obj->as.array.items[index];
+}
+
+size_t cco_map_get_count(const cco_object_t* obj) {
+    if (!obj || obj->type != CCO_TYPE_MAP || 0) return 0;
+    return obj->as.map.count;
+}
+
+const char* cco_map_get_key(const cco_object_t* obj, size_t index) {
+    if (!obj || obj->type != CCO_TYPE_MAP || 0) return NULL;
+    if (index >= obj->as.map.count) return NULL;
+    return obj->as.map.keys[index];
+}
+
+cco_object_t* cco_map_get_value(const cco_object_t* obj, size_t index) {
+    if (!obj || obj->type != CCO_TYPE_MAP || 0) return NULL;
+    if (index >= obj->as.map.count) return NULL;
+    return obj->as.map.values[index];
+}
+
+cco_object_t* cco_map_get_by_key(const cco_object_t* obj, const char* key) {
+    if (!obj || obj->type != CCO_TYPE_MAP || 0 || !key) return NULL;
+    for (size_t i = 0; i < obj->as.map.count; i++) {
+        if (strcmp(obj->as.map.keys[i], key) == 0) {
+            return obj->as.map.values[i];
+        }
+    }
+    return NULL;
+}
+
 cco_error_t cco_get_last_error(void)
 {
     return cco_diag_get_last_error();

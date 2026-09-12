@@ -40,6 +40,30 @@ void cco_object_retain(cco_object_t* obj);
 /* Decrements the reference count of the object. Frees memory if count reaches zero. */
 void cco_object_release(cco_object_t* obj);
 
+
+/* Returns true if object is a boolean, and sets *out_val. */
+bool cco_object_get_boolean(const cco_object_t* obj, bool* out_val);
+
+/* Returns true if object is an integer, and sets *out_val. */
+bool cco_object_get_integer(const cco_object_t* obj, int64_t* out_val);
+
+/* Returns true if object is a float, and sets *out_val. */
+bool cco_object_get_float(const cco_object_t* obj, double* out_val);
+
+/* Returns true if object is a string. Returns the string length and sets *out_val to a pointer to the string data. 
+   The returned pointer is valid as long as the object is alive. */
+bool cco_object_get_string(const cco_object_t* obj, const char** out_val, size_t* out_len);
+
+/* Array getters */
+size_t cco_array_get_count(const cco_object_t* obj);
+cco_object_t* cco_array_get_item(const cco_object_t* obj, size_t index);
+
+/* Map getters */
+size_t cco_map_get_count(const cco_object_t* obj);
+const char* cco_map_get_key(const cco_object_t* obj, size_t index);
+cco_object_t* cco_map_get_value(const cco_object_t* obj, size_t index);
+cco_object_t* cco_map_get_by_key(const cco_object_t* obj, const char* key);
+
 /* --- Diagnostic APIs --- */
 
 /* Retrieves the first error encountered during the last parse operation on this thread. */

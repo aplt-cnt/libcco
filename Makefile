@@ -210,7 +210,7 @@ examples: ## Build one example: make examples name=<file>
 	comp="$(CC)"; case "$$src" in *.c) ;; *) comp="$(CXX)";; esac; \
 	mkdir -p $(BUILD_DIR)/examples; \
 	$(STEP) "build $$src"; \
-	$$comp $(CPPFLAGS) $(WARN) $(OPT) $$src $(LIB_SRCS) $(LDFLAGS) $(LDLIBS) -o $(BUILD_DIR)/examples/$(name); \
+	$$comp $(CPPFLAGS) $(WARNING_FLAGS) $(OPT) $$src $(BUILD_DIR)/debug/liblibcco.a $(LDFLAGS) $(LDLIBS) -o $(BUILD_DIR)/examples/$(name); \
 	$(OK) "$(BUILD_DIR)/examples/$(name)"
 
 ##@ Quality
