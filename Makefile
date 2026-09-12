@@ -21,6 +21,42 @@ BIN         ?= $(PROJECT)
 PREFIX  ?= /usr/local
 DESTDIR ?=
 
+# --- parameter catch-all ----------------------------------------------------
+CUSTOM_CFLAGS :=
+CUSTOM_CPPFLAGS :=
+
+# Check if help is requested anywhere in goals
+ifneq ($(filter -h --help help,$(MAKECMDGOALS)),)
+  .DEFAULT_GOAL := help
+  # Make all other goals do nothing
+  $(eval %:: ; @:)
+else
+  ifneq ($(MAKECMDGOALS),)
+    # Turn all extra goals into do-nothing targets
+    $(eval %:: ; @:)
+
+    # Extract options using a shell loop
+    PARSE_OUTPUT := $(shell \
+        args="$(MAKECMDGOALS)"; \
+        mode="none"; \
+        for arg in $$args; do \
+            if [ "$$arg" = "-co" ] || [ "$$arg" = "--compile-option" ]; then \
+                mode="co"; \
+            elif [ "$$arg" = "-fo" ] || [ "$$arg" = "--feature-option" ]; then \
+                mode="fo"; \
+            else \
+                if [ "$$mode" = "co" ]; then \
+                    echo "CUSTOM_CFLAGS+=$$arg"; \
+                elif [ "$$mode" = "fo" ]; then \
+                    echo "CUSTOM_CPPFLAGS+=-D$$arg"; \
+                fi; \
+            fi; \
+        done \
+    )
+    $(eval $(PARSE_OUTPUT))
+  endif
+endif
+
 # --- toolchain --------------------------------------------------------------
 CC       ?= cc
 CXX      ?= c++
@@ -28,9 +64,9 @@ AR       ?= ar
 CSTD     ?= c11
 CXXSTD   ?= c++17
 WARNING_FLAGS ?= -Wall -Wextra -Wpedantic
-CFLAGS   ?=
-CXXFLAGS ?=
-CPPFLAGS += -I$(INC_DIR)
+CFLAGS   ?= $(CUSTOM_CFLAGS)
+CXXFLAGS ?= $(CUSTOM_CFLAGS)
+CPPFLAGS += -I$(INC_DIR) $(CUSTOM_CPPFLAGS)
 LDFLAGS  ?=
 LDLIBS   ?=
 
@@ -127,6 +163,10 @@ help: ## Show this help
 			msg = $$2; sub(/^[ \t]*/, "", msg); \
 			printf "  \033[36m%-22s\033[0m \033[2m%s\033[0m\n", $$1, msg \
 		}' $(MAKEFILE_LIST)
+	@printf '\n  \033[1;33mOptions\033[0m\n'
+	@printf '  \033[36m-co, --compile-option\033[0m  \033[2mCustom compile options (e.g. -O3)\033[0m\n'
+	@printf '  \033[36m-fo, --feature-option\033[0m  \033[2mCustom feature macros (e.g. CCO_ENABLE_EVAL)\033[0m\n'
+	@printf '  \033[36m-h, --help           \033[0m  \033[2mShow this help (same as make help)\033[0m\n'
 	@printf '\n'
 
 ##@ Build

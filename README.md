@@ -80,23 +80,41 @@ int main(void) {
 
 Requires a C11 compiler (GCC, Clang, or MSVC) and GNU Make.
 
+You can build the project using the unified generic Makefile:
+
 ```sh
-make build   # configure and build the library
-make test    # build and run the test suite
-make lint    # format, tidy, and static analysis checks
-make clean   # remove build artifacts
+make build          # Build debug binary (alias of build.debug)
+make build.release  # Compile with release flags (-O2)
+make run            # Run the binary (ARGS="..." to pass arguments)
+make tests          # Build and run the test suite
+make lint           # Run static analysis on the sources
+make docs           # Generate API documentation with Doxygen
+make install        # Install artifacts under /usr/local
+make clean          # Remove all build artifacts
 ```
 
-Outputs:
+### Command Line Options
 
-| Path | What |
-|---|---|
-| `build/liblibcco.a` | static library |
-| `build/` | build output directory |
+You can pass arbitrary compiler options and feature macros directly to `make` without modifying the Makefile. The Makefile captures all appended arguments:
 
-Full list of targets: run `make` with no arguments, or see the top of
-`Makefile`. Targets that need the sanitizers accept `SANITIZER=...`,
-and the compiler can be overridden with `CC=...`.
+* **`-co, --compile-option`**
+  Pass custom compilation flags (e.g., optimization or warning flags).
+* **`-fo, --feature-option`**
+  Enable specific feature macros (automatically prefixed with `-D`).
+* **`-h, --help`** or **`help`**
+  Show the interactive help documentation.
+
+**Examples:**
+```sh
+# Build with O3 optimization and LTO
+make build.release -- -co -O3 -co -flto
+
+# Build with a specific feature enabled
+make build.debug -- -fo CCO_ENABLE_EVAL -fo CCO_ENABLE_FORMAT
+
+# Show help (you can also just run 'make help')
+make -- -h
+```
 
 ## Tutorial
 
