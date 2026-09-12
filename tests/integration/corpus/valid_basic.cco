@@ -1,1 +1,7 @@
-()
+user: {
+    name: "John Doe",
+    age: 30,
+    is_admin: true,
+    roles: [ "developer", "tester" ],
+    preferences: None
+}

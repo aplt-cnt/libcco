@@ -183,3 +183,48 @@ bool cco_object_equals(const cco_object_t* a, const cco_object_t* b)
     }
     return false;
 }
+
+cco_error_t cco_array_append(cco_object_t* arr, cco_object_t* item) {
+    if (!arr || arr->type != CCO_TYPE_ARRAY || !item) return CCO_ERR_INVALID_ARG;
+    if (arr->as.array.count >= arr->as.array.capacity) {
+        size_t new_cap = arr->as.array.capacity == 0 ? 8 : arr->as.array.capacity * 2;
+        cco_object_t** new_items = realloc(arr->as.array.items, new_cap * sizeof(cco_object_t*));
+        if (!new_items) return CCO_ERR_NO_MEMORY;
+        arr->as.array.items = new_items;
+        arr->as.array.capacity = new_cap;
+    }
+    arr->as.array.items[arr->as.array.count++] = item;
+    cco_object_retain(item);
+    return CCO_OK;
+}
+
+cco_error_t cco_map_insert(cco_object_t* map, const char* key, cco_object_t* value) {
+    if (!map || map->type != CCO_TYPE_MAP || !key || !value) return CCO_ERR_INVALID_ARG;
+    /* very simple array-based map for now, replacing existing if present */
+    for (size_t i = 0; i < map->as.map.count; i++) {
+        if (strcmp(map->as.map.keys[i], key) == 0) {
+            cco_object_release(map->as.map.values[i]);
+            map->as.map.values[i] = value;
+            cco_object_retain(value);
+            return CCO_OK;
+        }
+    }
+    if (map->as.map.count >= map->as.map.capacity) {
+        size_t new_cap = map->as.map.capacity == 0 ? 8 : map->as.map.capacity * 2;
+        char** new_keys = realloc(map->as.map.keys, new_cap * sizeof(char*));
+        cco_object_t** new_vals = realloc(map->as.map.values, new_cap * sizeof(cco_object_t*));
+        if (!new_keys || !new_vals) return CCO_ERR_NO_MEMORY;
+        map->as.map.keys = new_keys;
+        map->as.map.values = new_vals;
+        map->as.map.capacity = new_cap;
+    }
+    size_t klen = strlen(key);
+    char* dup_key = malloc(klen + 1);
+    if (!dup_key) return CCO_ERR_NO_MEMORY;
+    memcpy(dup_key, key, klen + 1);
+    map->as.map.keys[map->as.map.count] = dup_key;
+    map->as.map.values[map->as.map.count] = value;
+    map->as.map.count++;
+    cco_object_retain(value);
+    return CCO_OK;
+}

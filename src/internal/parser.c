@@ -1,4 +1,6 @@
 #include "parser.h"
+#include <stdlib.h>
+#include <string.h>
 
 #include "diag.h"
 #include <string.h>
@@ -38,19 +40,54 @@ static cco_object_t* parse_value(cco_parser_context_t* ctx);
 
 static cco_object_t* parse_map(cco_parser_context_t* ctx)
 {
-    (void)ctx;
     cco_object_t* obj = cco_object_create(CCO_TYPE_MAP);
-    if (!obj) return NULL;
-    /* Map parsing logic omitted for effort conservation, just return empty obj */
+    if (!obj) { ctx->last_error = CCO_ERR_NO_MEMORY; return NULL; }
+    
+    while (ctx->current_token.type != CCO_TOK_RPAREN && ctx->current_token.type != CCO_TOK_RBRACE && ctx->current_token.type != CCO_TOK_RBRACKET && ctx->current_token.type != CCO_TOK_EOF) {
+        if (ctx->current_token.type != CCO_TOK_IDENTIFIER) {
+            ctx->last_error = CCO_ERR_PARSE; break;
+        }
+        size_t klen = ctx->current_token.text_len;
+        char* key = malloc(klen + 1);
+        if (!key) { ctx->last_error = CCO_ERR_NO_MEMORY; break; }
+        memcpy(key, ctx->current_token.text_ptr, klen);
+        key[klen] = '\0';
+        advance_token(ctx);
+        if (ctx->current_token.type != CCO_TOK_COLON) {
+            free(key); ctx->last_error = CCO_ERR_PARSE; break;
+        }
+        advance_token(ctx);
+        cco_object_t* val = parse_value(ctx);
+        if (!val) { free(key); break; }
+        cco_error_t err = cco_map_insert(obj, key, val);
+        free(key); cco_object_release(val);
+        if (err != CCO_OK) { ctx->last_error = err; break; }
+        if (ctx->current_token.type == CCO_TOK_COMMA) { advance_token(ctx); }
+        else if (ctx->current_token.type != CCO_TOK_RPAREN && ctx->current_token.type != CCO_TOK_RBRACE && ctx->current_token.type != CCO_TOK_RBRACKET) {
+            ctx->last_error = CCO_ERR_PARSE; break;
+        }
+    }
+    if (ctx->last_error != CCO_OK) { cco_object_release(obj); return NULL; }
     return obj;
 }
 
 static cco_object_t* parse_array(cco_parser_context_t* ctx)
 {
-    (void)ctx;
     cco_object_t* obj = cco_object_create(CCO_TYPE_ARRAY);
-    if (!obj) return NULL;
-    /* Array parsing logic omitted for effort conservation */
+    if (!obj) { ctx->last_error = CCO_ERR_NO_MEMORY; return NULL; }
+    
+    while (ctx->current_token.type != CCO_TOK_RPAREN && ctx->current_token.type != CCO_TOK_RBRACE && ctx->current_token.type != CCO_TOK_RBRACKET && ctx->current_token.type != CCO_TOK_EOF) {
+        cco_object_t* val = parse_value(ctx);
+        if (!val) break;
+        cco_error_t err = cco_array_append(obj, val);
+        cco_object_release(val);
+        if (err != CCO_OK) { ctx->last_error = err; break; }
+        if (ctx->current_token.type == CCO_TOK_COMMA) { advance_token(ctx); }
+        else if (ctx->current_token.type != CCO_TOK_RPAREN && ctx->current_token.type != CCO_TOK_RBRACE && ctx->current_token.type != CCO_TOK_RBRACKET) {
+            ctx->last_error = CCO_ERR_PARSE; break;
+        }
+    }
+    if (ctx->last_error != CCO_OK) { cco_object_release(obj); return NULL; }
     return obj;
 }
 
@@ -84,32 +121,62 @@ static cco_object_t* parse_value(cco_parser_context_t* ctx)
             break;
         case CCO_TOK_INTEGER:
             result = cco_object_create(CCO_TYPE_INTEGER);
-            /* parse int logic omitted */
+            if (result) {
+                char tmp[64];
+                size_t cpy_len = ctx->current_token.text_len < 63 ? ctx->current_token.text_len : 63;
+                memcpy(tmp, ctx->current_token.text_ptr, cpy_len);
+                tmp[cpy_len] = '\0';
+                result->as.integer = strtoll(tmp, NULL, 10);
+            }
             advance_token(ctx);
             break;
         case CCO_TOK_FLOAT:
             result = cco_object_create(CCO_TYPE_FLOAT);
+            if (result) {
+                char tmp[64];
+                size_t cpy_len = ctx->current_token.text_len < 63 ? ctx->current_token.text_len : 63;
+                memcpy(tmp, ctx->current_token.text_ptr, cpy_len);
+                tmp[cpy_len] = '\0';
+                result->as.floating = strtod(tmp, NULL);
+            }
             advance_token(ctx);
             break;
         case CCO_TOK_STRING:
             result = cco_object_create(CCO_TYPE_STRING);
-            /* Handle string intern / arena alloc omitted */
+            if (result) {
+                size_t slen = ctx->current_token.text_len;
+                char* sdup = malloc(slen + 1);
+                if (sdup) {
+                    memcpy(sdup, ctx->current_token.text_ptr, slen);
+                    sdup[slen] = '\0';
+                    result->as.string.data = sdup;
+                    result->as.string.length = slen;
+                } else {
+                    ctx->last_error = CCO_ERR_NO_MEMORY;
+                }
+            }
             advance_token(ctx);
             break;
         case CCO_TOK_LPAREN:
-            /* Disambiguation: if next token is identifier followed by colon, it's a map */
-            advance_token(ctx); /* skip ( */
+            advance_token(ctx);
             if (ctx->current_token.type == CCO_TOK_IDENTIFIER && ctx->next_token.type == CCO_TOK_COLON) {
                 result = parse_map(ctx);
             } else if (ctx->current_token.type == CCO_TOK_RPAREN) {
-                /* empty map by default in CCO */
                 result = parse_map(ctx);
             } else {
                 result = parse_array(ctx);
             }
-            if (ctx->current_token.type == CCO_TOK_RPAREN) {
-                advance_token(ctx); /* skip ) */
-            }
+            if (ctx->current_token.type == CCO_TOK_RPAREN) advance_token(ctx);
+            break;
+        case CCO_TOK_LBRACE:
+            advance_token(ctx);
+            result = parse_map(ctx);
+            if (ctx->current_token.type == CCO_TOK_RBRACE) advance_token(ctx);
+            break;
+        case CCO_TOK_LBRACKET:
+            advance_token(ctx);
+            result = parse_array(ctx);
+            if (ctx->current_token.type == CCO_TOK_RBRACKET) advance_token(ctx);
             break;
         default:
             cco_diag_record(CCO_ERR_PARSE, ctx->current_token.line, ctx->current_token.col, "parse_value", "Unexpected token");
@@ -133,8 +200,11 @@ cco_object_t* cco_parse_document(cco_parser_context_t* ctx)
         goto cleanup;
     }
 
-    /* parse top level shorthand map if needed, simplified here */
-    root = parse_value(ctx);
+    if (ctx->current_token.type == CCO_TOK_IDENTIFIER && ctx->next_token.type == CCO_TOK_COLON) {
+        root = parse_map(ctx);
+    } else {
+        root = parse_value(ctx);
+    }
 
 cleanup:
     if (ctx->last_error != CCO_OK) {

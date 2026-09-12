@@ -164,6 +164,10 @@ cco_error_t cco_lexer_next(cco_lexer_t* lexer, cco_token_t* out_token)
     switch (c) {
         case '(': out_token->type = CCO_TOK_LPAREN; break;
         case ')': out_token->type = CCO_TOK_RPAREN; break;
+        case '{': out_token->type = CCO_TOK_LBRACE; break;
+        case '}': out_token->type = CCO_TOK_RBRACE; break;
+        case '[': out_token->type = CCO_TOK_LBRACKET; break;
+        case ']': out_token->type = CCO_TOK_RBRACKET; break;
         case ':': out_token->type = CCO_TOK_COLON; break;
         case ',': out_token->type = CCO_TOK_COMMA; break;
         case '+': out_token->type = CCO_TOK_PLUS; break;
