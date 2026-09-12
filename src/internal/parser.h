@@ -4,7 +4,7 @@
 #include "lexer.h"
 #include "object.h"
 
-typedef struct {
+typedef struct cco_parser_context_s {
     cco_lexer_t lexer;
     cco_token_t current_token;
     cco_token_t next_token;

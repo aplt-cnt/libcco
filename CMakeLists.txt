@@ -39,6 +39,7 @@ set(SOURCES
     src/internal/eval.c
     src/internal/call.c
     src/internal/sandbox.c
+    src/internal/cco.c
 )
 
 add_library(cco STATIC ${SOURCES})

@@ -1,107 +1,52 @@
 #ifndef CNT_CCO_H
 #define CNT_CCO_H
 
-/*
- * libcco public C API.
- *
- * Status: indev. The complete public surface is filled in as
- * implementation lands. docs/api.md is the authoritative reference and
- * MUST be updated in the same commit as any public symbol change.
- */
-
-#include <stdbool.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-    /* ---------------------------------------------------------------- *
-     * Compile-time feature flags.
-     *
-     * Each macro below is a build-time switch. When a flag is OFF, the
-     * corresponding syntax is rejected at parse time with
-     * CCO_ERR_FORBIDDEN, and any public API for that feature returns
-     * CCO_ERR_FORBIDDEN instead of silently degrading.
-     *
-     * The caller's translation units and the library MUST be compiled
-     * with the same flag set. Mixing them produces different
-     * cco_parse_options_t layouts and is an ABI mismatch. See
-     * docs/feature-flags.md for the full matrix.
-     * ---------------------------------------------------------------- */
+/* Include error codes and options */
+#include <cnt/cco_error.h>
+#include <cnt/cco_options.h>
 
-#ifndef CCO_ENABLE_FORMAT
-#define CCO_ENABLE_FORMAT 0
-#endif
+/* Opaque handles for internal types */
+typedef struct cco_object_s cco_object_t;
+typedef struct cco_parser_context_s cco_parser_context_t;
+typedef struct cco_arena_s cco_arena_t;
 
-#ifndef CCO_ENABLE_EVAL
-#define CCO_ENABLE_EVAL 0
-#endif
+/* --- Lifecycle APIs --- */
 
-#ifndef CCO_ENABLE_COMMENT_PRESERVE
-#define CCO_ENABLE_COMMENT_PRESERVE 0
-#endif
+/* Parses a CCO document from a string. 
+   Caller owns the returned object and MUST call cco_object_release() on it when done.
+   If an error occurs, returns NULL and the specific error code can be fetched via diagnostic APIs. */
+cco_object_t* cco_parse_string(const char* src, size_t len, const cco_parse_options_t* opts);
 
-#ifndef CCO_ENABLE_ERROR_RECOVERY
-#define CCO_ENABLE_ERROR_RECOVERY 0
-#endif
+/* Serializes a CCO object into a newly allocated C-string. 
+   Caller MUST free() the returned string. Returns NULL on failure. */
+char* cco_serialize_to_string(const cco_object_t* obj, bool pretty);
 
-#ifndef CCO_ENABLE_ENV
-#define CCO_ENABLE_ENV 0
-#endif
+/* --- Object Model APIs --- */
 
-#ifndef CCO_ENABLE_STATIC_CALLS
-#define CCO_ENABLE_STATIC_CALLS 1
-#endif
+/* Retrieves the type of the given object. */
+int cco_object_get_type(const cco_object_t* obj);
 
-#ifndef CCO_ENABLE_CONSTRUCTORS
-#define CCO_ENABLE_CONSTRUCTORS 1
-#endif
+/* Increments the reference count of the object. */
+void cco_object_retain(cco_object_t* obj);
 
-    /* ---------------------------------------------------------------- *
-     * Version
-     * ---------------------------------------------------------------- */
+/* Decrements the reference count of the object. Frees memory if count reaches zero. */
+void cco_object_release(cco_object_t* obj);
 
-#define CCO_VERSION_MAJOR 0
-#define CCO_VERSION_MINOR 1
-#define CCO_VERSION_PATCH 0
+/* --- Diagnostic APIs --- */
 
-    /* ---------------------------------------------------------------- *
-     * Opaque handle types. Bodies are private to src/.
-     * ---------------------------------------------------------------- */
+/* Retrieves the first error encountered during the last parse operation on this thread. */
+cco_error_t cco_get_last_error(void);
 
-    typedef struct cco_object_s cco_object_t;
-    typedef struct cco_array_s cco_array_t;
-    typedef struct cco_parse_result_s cco_parse_result_t;
-    typedef struct cco_symbol_table_s cco_symbol_table_t;
-    typedef struct cco_template_s cco_template_t;
-    typedef struct cco_expr_s cco_expr_t;
-
-    /* ---------------------------------------------------------------- *
-     * Error codes.
-     * ---------------------------------------------------------------- */
-
-    typedef enum
-    {
-        CCO_OK = 0,
-        CCO_ERR_PARSE = -1,
-        CCO_ERR_NOT_FOUND = -2,
-        CCO_ERR_TYPE_MISMATCH = -3,
-        CCO_ERR_OUT_OF_RANGE = -4,
-        CCO_ERR_IO = -5,
-        CCO_ERR_FORBIDDEN = -6,
-        CCO_ERR_NOMEM = -7,
-        CCO_ERR_DEPTH_EXCEEDED = -8,
-        CCO_ERR_INVALID_ARG = -9
-    } cco_err_t;
-
-    /*
-     * Function declarations are added here as implementation lands. Every
-     * addition MUST also update docs/api.md.
-     */
+/* Clears thread-local diagnostics. */
+void cco_clear_diagnostics(void);
 
 #ifdef __cplusplus
 }

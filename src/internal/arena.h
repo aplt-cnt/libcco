@@ -12,7 +12,7 @@ struct cco_arena_block_s {
     unsigned char data[];
 };
 
-typedef struct {
+typedef struct cco_arena_s {
     cco_arena_block_t* head;
     size_t total_allocated;
     size_t max_allocation_limit;
