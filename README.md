@@ -49,33 +49,33 @@ every consumer.
 
 ## Quick Start
 
+> **NOTE:** A comprehensive Quick Start Guide with C/C++ examples and compilation instructions is available at **[docs/quick-start.md](docs/quick-start.md)**.
+
 ```c
 #include <cnt/cco.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
 int main(void) {
-    const char *src = "name: \"libcco\", version: 1";
+    const char* cco_text = "server: ( host: \"localhost\", port: 8080 )";
+    
+    // Parse the object tree
+    cco_object_t* config = cco_parse_string(cco_text, strlen(cco_text), NULL);
+    if (!config) return 1;
 
-    cco_object_t *cfg = cco_parse(src);
-    if (!cfg) {
-        cco_diag_print_all(stderr);
-        return 1;
+    // Retrieve fields safely
+    cco_object_t* server = cco_map_get_by_key(config, "server");
+    const char* host; size_t len;
+    
+    if (server && cco_object_get_string(cco_map_get_by_key(server, "host"), &host, &len)) {
+        printf("host: %s\n", host);
     }
 
-    printf("name = %s\n", cco_string_get(cco_object_get(cfg, "name")));
-    printf("version = %lld\n",
-           (long long)cco_int_get(cco_object_get(cfg, "version")));
-
-    char *text = cco_serialize_pretty(cfg, 2);
-    printf("Config:\n%s\n", text);
-    free(text);
-
-    cco_object_free(cfg);
+    // Release memory (automatically cleans up the tree)
+    cco_object_release(config);
     return 0;
 }
 ```
-
 ## Building
 
 Requires a C11 compiler (GCC, Clang, or MSVC) and GNU Make.
