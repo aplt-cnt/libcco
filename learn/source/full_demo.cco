@@ -1,0 +1,42 @@
+/* NOTE: full_demo.cco -- Complete example combining all CCO features */
+
+$typedef.Url: String,
+$typedef.Port: Integer = Integer,
+
+$enum.Mode = (DEV, STAGING, PROD),
+$enum.HttpMethod = (GET, POST, PUT, DELETE),
+
+$temp.Endpoint: (
+    url: Url,
+    method: HttpMethod,
+    timeout: Integer = 30
+),
+
+$temp.SecureEndpoint + Endpoint: (
+    port: Port = 443,
+    cert: String
+),
+
+$temp.App: (
+    name: String,
+    version: Float,
+    mode: Mode = DEV,
+    endpoints: Array
+),
+
+/* NOTE: root value */
+app: #App(
+    "libcco-demo",
+    0.1,
+    DEV,
+    (
+        #Endpoint("https://api.example.com", GET),
+        #Endpoint("https://api.example.com/upload", POST, 60),
+        #SecureEndpoint("https://admin.example.com", POST, 30, 8443, "/etc/cert.pem"),
+        #SecureEndpoint(
+            .url: "https://backup.example.com",
+            .method: PUT,
+            .cert: "/etc/backup-cert.pem"
+        )
+    )
+)

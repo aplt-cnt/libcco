@@ -1,0 +1,47 @@
+/* NOTE: server.cco -- Complete template workflow: definition, inheritance, instantiation (Chapters 11-15) */
+
+$typedef.Url: String,
+$enum.Mode = (DEV, STAGING, PROD),
+
+/* NOTE: base template */
+$temp.Server: (
+    host: String,
+    port: Integer = 8080,
+    mode: Mode = DEV,
+    timeout: Integer = 30
+),
+
+/* NOTE: inherited template */
+$temp.SecureServer + Server: (
+    cert: String,
+    ssl_port: Integer = 443
+),
+
+/* NOTE: multi-level inheritance */
+$temp.Shape: ( area: Float ),
+$temp.Circle + Shape: ( radius: Float ),
+$temp.SmallCircle + Circle: ( label: String ),
+
+/* NOTE: positional instantiation */
+s1: #Server("localhost"),
+s2: #Server("example.com", 443),
+s3: #Server("test.com", 80, PROD, 60),
+
+/* NOTE: named instantiation */
+s4: #Server(.host: "named.example.com", .mode: PROD, .port: 9090),
+
+/* NOTE: inheritance with positional args (parent fields first) */
+secure1: #SecureServer("secure.example.com", 443, DEV, 30, "/etc/cert.pem", 8443),
+
+/* NOTE: inheritance with named args */
+secure2: #SecureServer(
+    .host: "api.example.com",
+    .cert: "/etc/cert.pem",
+    .ssl_port: 8443,
+    .mode: PROD
+),
+
+/* NOTE: multi-level inheritance */
+origin: #Point(0.0, 0.0),
+c: #Circle(3.14, 1.5),
+small: #SmallCircle(1.0, 0.5, "tiny")
