@@ -1,0 +1,42 @@
+#ifndef CNT_CCO_INTERNAL_SYMTAB_H
+#define CNT_CCO_INTERNAL_SYMTAB_H
+
+#include "object.h"
+#include "parser.h"
+#include "hash.h"
+
+typedef struct {
+    const char* target_type_name; /* Interned */
+} cco_typedef_t;
+
+typedef struct {
+    cco_map_t values; /* Map of string identifier to integer object */
+} cco_enum_def_t;
+
+typedef struct {
+    cco_map_t fields; /* Map of field name to default value object */
+    const char* parent_name; /* Interned, NULL if no parent */
+} cco_template_def_t;
+
+typedef struct {
+    cco_intern_table_t aliases;   /* map of interned name -> cco_typedef_t* */
+    cco_intern_table_t enums;     /* map of interned name -> cco_enum_def_t* */
+    cco_intern_table_t templates; /* map of interned name -> cco_template_def_t* */
+    cco_arena_t* arena;
+} cco_symtab_t;
+
+void cco_symtab_init(cco_symtab_t* symtab, cco_arena_t* arena);
+
+/* Type alias registration with cycle detection */
+cco_error_t cco_symtab_add_typedef(cco_symtab_t* symtab, const char* name, const char* target);
+
+/* Enum registration */
+cco_error_t cco_symtab_add_enum(cco_symtab_t* symtab, const char* name, cco_enum_def_t* def);
+
+/* Template registration with inheritance cycle detection */
+cco_error_t cco_symtab_add_template(cco_symtab_t* symtab, const char* name, cco_template_def_t* def);
+
+/* Parse top-level declarations (simplified entry point for the parser) */
+cco_error_t cco_parse_declarations(cco_parser_context_t* ctx, cco_symtab_t* symtab);
+
+#endif /* CNT_CCO_INTERNAL_SYMTAB_H */
