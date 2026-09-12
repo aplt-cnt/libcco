@@ -43,7 +43,45 @@ set(SOURCES
 )
 
 add_library(cco STATIC ${SOURCES})
-target_include_directories(cco PUBLIC include PRIVATE src)
+add_library(cnt::cco ALIAS cco)
+
+target_include_directories(cco
+    PUBLIC 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/internal
+)
+
+include(GNUInstallDirs)
+
+install(TARGETS cco
+    EXPORT ccoTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(DIRECTORY include/cnt
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+)
+
+install(EXPORT ccoTargets
+    FILE ccoTargets.cmake
+    NAMESPACE cnt::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cco
+)
+
+# Minimal config file
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/ccoConfig.cmake
+"include(\"\${CMAKE_CURRENT_LIST_DIR}/ccoTargets.cmake\")\n"
+)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ccoConfig.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cco
+)
 
 # Add custom target for linting
 add_custom_target(lint
