@@ -1,0 +1,18 @@
+#ifndef CNT_CCO_INTERNAL_SERIALIZER_H
+#define CNT_CCO_INTERNAL_SERIALIZER_H
+
+#include "object.h"
+#include "strbuf.h"
+
+typedef struct {
+    bool pretty;          /* True for pretty print, false for compact */
+    int indent_spaces;    /* Number of spaces per indentation level */
+    int current_indent;   /* Current indentation depth */
+    cco_strbuf_t* out;    /* Output string buffer */
+} cco_serializer_context_t;
+
+/* Serializes the object into the provided string buffer. 
+   If pretty is true, uses indentation and newlines. */
+cco_error_t cco_serialize(const cco_object_t* obj, cco_strbuf_t* out_buf, bool pretty);
+
+#endif /* CNT_CCO_INTERNAL_SERIALIZER_H */

@@ -35,6 +35,7 @@ set(SOURCES
     src/internal/parser.c
     src/internal/symtab.c
     src/internal/inst.c
+    src/internal/serializer.c
 )
 
 add_library(cco STATIC ${SOURCES})
