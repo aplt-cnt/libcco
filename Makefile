@@ -70,6 +70,12 @@ CPPFLAGS += -I$(INC_DIR) $(CUSTOM_CPPFLAGS)
 LDFLAGS  ?=
 LDLIBS   ?=
 
+ifneq ($(SANITIZER),)
+CFLAGS   += -fsanitize=$(SANITIZER)
+CXXFLAGS += -fsanitize=$(SANITIZER)
+LDFLAGS  += -fsanitize=$(SANITIZER)
+endif
+
 OPT_DEBUG   ?= -O0 -g3 -DDEBUG
 OPT_RELEASE ?= -O2 -DNDEBUG
 
@@ -213,10 +219,10 @@ tests: build.debug ## Build and run the test suite
 	@if [ -f $(TEST_DIR)/Makefile ]; then \
 		$(STEP) "delegate to $(TEST_DIR)/Makefile"; \
 		$(MAKE) -C $(TEST_DIR); \
-	elif ls $(TEST_DIR)/*.c $(TEST_DIR)/*.cc $(TEST_DIR)/*.cpp >/dev/null 2>&1; then \
+	elif [ -n "$$(find $(TEST_DIR) -maxdepth 1 -name '*.c' -o -name '*.cc' -o -name '*.cpp' 2>/dev/null | head -n1)" ]; then \
 		mkdir -p $(BUILD_DIR)/debug/tests; \
 		$(STEP) "build tests"; \
-		$(LD) $(CPPFLAGS) $(WARN) $(OPT) $(TEST_DIR)/*.c $(TEST_DIR)/*.cc $(TEST_DIR)/*.cpp $(LIB_SRCS) $(LDFLAGS) $(LDLIBS) -o $(BUILD_DIR)/debug/tests/run 2>/dev/null || \
+		$(LD) $(CPPFLAGS) $(WARNING_FLAGS) $(OPT) $$(find $(TEST_DIR) -maxdepth 1 -name '*.c' -o -name '*.cc' -o -name '*.cpp') $(LIB_SRCS) $(LDFLAGS) $(LDLIBS) -o $(BUILD_DIR)/debug/tests/run || \
 		{ $(ERR) "test build failed"; exit 1; }; \
 		$(STEP) "run tests"; \
 		$(BUILD_DIR)/debug/tests/run; \

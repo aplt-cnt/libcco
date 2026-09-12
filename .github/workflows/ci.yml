@@ -42,7 +42,7 @@ jobs:
         sanitizer: [address+undefined, memory]
     steps:
       - uses: actions/checkout@v4
-      - run: make test SANITIZER=${{ matrix.sanitizer }}
+      - run: make tests SANITIZER=${{ matrix.sanitizer }}
 
   security:
     runs-on: ubuntu-22.04

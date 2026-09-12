@@ -8,14 +8,51 @@
 #include <stdlib.h>
 #include <string.h>
 
+void cco_parse_options_init(cco_parse_options_t* opts)
+{
+    if (!opts) return;
+    memset(opts, 0, sizeof(cco_parse_options_t));
+    opts->max_depth = 256;
+    opts->max_string_length = 1048576;
+    opts->max_document_size = 10485760;
+    opts->max_total_allocation = 10485760;
+    opts->max_instantiations = 1000;
+    opts->max_steps = 10000;
+    opts->allow_colon_instantiation = true;
+    opts->strict_typing = true;
+    opts->restrict_filesystem = true;
+    opts->base_dir = ".";
+#ifdef CCO_ENABLE_FORMAT
+    opts->allow_format_builtin = true;
+#endif
+#ifdef CCO_ENABLE_EVAL
+    opts->allow_eval = true;
+#endif
+#ifdef CCO_ENABLE_ENV
+    opts->allow_env_builtin = true;
+#endif
+#ifdef CCO_ENABLE_STATIC_CALLS
+    opts->allow_static_calls = true;
+#endif
+#ifdef CCO_ENABLE_CONSTRUCTORS
+    opts->allow_constructors = true;
+#endif
+}
+
 cco_object_t* cco_parse_string(const char* src, size_t len, const cco_parse_options_t* opts)
 {
     if (!src) return NULL;
     
+    cco_parse_options_t default_opts;
+    if (!opts) {
+        cco_parse_options_init(&default_opts);
+        opts = &default_opts;
+    }
+    
     cco_diag_clear();
     
     cco_arena_t arena;
-    cco_arena_init(&arena, opts ? opts->max_total_allocation : 0);
+    cco_arena_init(&arena, opts->max_total_allocation);
     
     cco_parser_context_t ctx;
     cco_parser_init(&ctx, src, len, opts, &arena);
