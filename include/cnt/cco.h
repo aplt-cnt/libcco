@@ -29,6 +29,17 @@ cco_object_t* cco_parse_string(const char* src, size_t len, const cco_parse_opti
    Caller MUST free() the returned string. Returns NULL on failure. */
 char* cco_serialize_to_string(const cco_object_t* obj, bool pretty);
 
+
+/* Object Types */
+#define CCO_TYPE_NONE    0
+#define CCO_TYPE_BOOLEAN 1
+#define CCO_TYPE_INTEGER 2
+#define CCO_TYPE_FLOAT   3
+#define CCO_TYPE_STRING  4
+#define CCO_TYPE_ARRAY   5
+#define CCO_TYPE_MAP     6
+#define CCO_TYPE_TEMPLATE_INSTANCE 7
+
 /* --- Object Model APIs --- */
 
 /* Retrieves the type of the given object. */
