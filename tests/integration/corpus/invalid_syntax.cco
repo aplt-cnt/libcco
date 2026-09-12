@@ -1,0 +1,5 @@
+// invalid_syntax.cco
+user: {
+    name: "John Doe
+    age: 30
+}

@@ -1,2 +1,3 @@
 run_unit_tests
 run_fuzzer
+run_integration

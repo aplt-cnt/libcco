@@ -44,8 +44,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: make tests SANITIZER=${{ matrix.sanitizer }}
 
-  security:
+  coverage:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - run: echo "Core zero dependencies, no SCA required"
+      - run: make coverage

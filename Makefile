@@ -230,6 +230,19 @@ tests: build.debug ## Build and run the test suite
 		$(WARN) "no tests found in $(TEST_DIR)/"; \
 	fi
 
+coverage: ## Run tests with gcov code coverage enabled
+	@$(STEP) "clean build before coverage"
+	@$(MAKE) clean >/dev/null
+	@$(STEP) "build tests with coverage"
+	@$(MAKE) tests OPT="-O0 -g3" CFLAGS="$(CFLAGS) -fprofile-arcs -ftest-coverage" LDFLAGS="$(LDFLAGS) -fprofile-arcs -ftest-coverage"
+	@$(STEP) "generate coverage report"
+	@mkdir -p build/coverage
+	@for f in src/internal/*.c; do \
+		gcov -o build/debug/obj/internal/$$(basename $$f).gcno $$f >/dev/null 2>&1 || true; \
+	done
+	@mv *.gcov build/coverage/ 2>/dev/null || true
+	@$(OK) "coverage report generated in build/coverage/"
+
 lint: ## Run static analysis on the sources
 	@if command -v cppcheck >/dev/null 2>&1; then \
 		$(STEP) "cppcheck"; \
