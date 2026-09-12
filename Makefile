@@ -27,7 +27,7 @@ CXX      ?= c++
 AR       ?= ar
 CSTD     ?= c11
 CXXSTD   ?= c++17
-WARN     ?= -Wall -Wextra -Wpedantic
+WARNING_FLAGS ?= -Wall -Wextra -Wpedantic
 CFLAGS   ?=
 CXXFLAGS ?=
 CPPFLAGS += -I$(INC_DIR)
@@ -78,22 +78,22 @@ TARGET    := $(call TARGET_OF,$(MODE))
 $(OBJ_DIR)/%.c.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	@$(STEP) "$<"
-	@$(CC) $(CPPFLAGS) $(CFLAGS) $(WARN) -std=$(CSTD) $(OPT) -MMD -MP -c $< -o $@
+	@$(CC) $(CPPFLAGS) $(CFLAGS) $(WARNING_FLAGS) -std=$(CSTD) $(OPT) -MMD -MP -c $< -o $@
 
 $(OBJ_DIR)/%.cc.o: $(SRC_DIR)/%.cc
 	@mkdir -p $(dir $@)
 	@$(STEP) "$<"
-	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(WARN) -std=$(CXXSTD) $(OPT) -MMD -MP -c $< -o $@
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(WARNING_FLAGS) -std=$(CXXSTD) $(OPT) -MMD -MP -c $< -o $@
 
 $(OBJ_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@$(STEP) "$<"
-	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(WARN) -std=$(CXXSTD) $(OPT) -MMD -MP -c $< -o $@
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(WARNING_FLAGS) -std=$(CXXSTD) $(OPT) -MMD -MP -c $< -o $@
 
 $(OBJ_DIR)/%.cxx.o: $(SRC_DIR)/%.cxx
 	@mkdir -p $(dir $@)
 	@$(STEP) "$<"
-	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(WARN) -std=$(CXXSTD) $(OPT) -MMD -MP -c $< -o $@
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(WARNING_FLAGS) -std=$(CXXSTD) $(OPT) -MMD -MP -c $< -o $@
 
 ifeq ($(IS_LIBRARY),1)
 LINK = $(AR) rcs $@ $^

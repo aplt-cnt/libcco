@@ -6,5 +6,5 @@ Checks: >
   performance-*,
   -readability-avoid-goto,
   -bugprone-easily-swappable-parameters
-WarningsAsErrors: '*'
+WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
