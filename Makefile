@@ -12,7 +12,7 @@ SRC_DIR     ?= src
 TEST_DIR    ?= tests
 INC_DIR     ?= include
 EXAMPLE_DIR ?= examples
-BUILD_DIR   ?= build
+BUILD_DIR   ?= target
 DOCS_DIR    ?= docs
 DOXYFILE    ?= Doxyfile
 BIN         ?= $(PROJECT)
@@ -236,12 +236,12 @@ coverage: ## Run tests with gcov code coverage enabled
 	@$(STEP) "build tests with coverage"
 	@$(MAKE) tests OPT="-O0 -g3" CFLAGS="$(CFLAGS) -fprofile-arcs -ftest-coverage" LDFLAGS="$(LDFLAGS) -fprofile-arcs -ftest-coverage"
 	@$(STEP) "generate coverage report"
-	@mkdir -p build/coverage
+	@mkdir -p target/coverage
 	@for f in src/internal/*.c; do \
-		gcov -o build/debug/obj/internal/$$(basename $$f).gcno $$f >/dev/null 2>&1 || true; \
+		gcov -o target/debug/obj/internal/$$(basename $$f).gcno $$f >/dev/null 2>&1 || true; \
 	done
-	@mv *.gcov build/coverage/ 2>/dev/null || true
-	@$(OK) "coverage report generated in build/coverage/"
+	@mv *.gcov target/coverage/ 2>/dev/null || true
+	@$(OK) "coverage report generated in target/coverage/"
 
 lint: ## Run static analysis on the sources
 	@if command -v cppcheck >/dev/null 2>&1; then \

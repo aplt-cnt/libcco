@@ -7,7 +7,7 @@ credentials.*
 secrets.*
 
 # Build artifacts
-build/
+target/
 build-*/
 *.o
 *.a

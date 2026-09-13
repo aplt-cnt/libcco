@@ -11,7 +11,7 @@ This document will quickly get you up to speed on the core integration and devel
 `libcco` has no third-party dependencies. You can directly add `src/` and `include/` to your build system, or use the included Makefile to build the static library:
 
 ```bash
-# Generate build/debug/liblibcco.a
+# Generate target/debug/liblibcco.a
 make build.debug
 
 # Or generate a release build with -O3 optimization
@@ -22,7 +22,7 @@ In your project, you only need to include the header file and link the static li
 
 ```c
 #include <cnt/cco.h>
-// Compile: cc your_code.c -I/path/to/libcco/include -L/path/to/libcco/build/debug -llibcco
+// Compile: cc your_code.c -I/path/to/libcco/include -L/path/to/libcco/target/debug -llibcco
 ```
 
 ---

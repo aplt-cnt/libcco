@@ -30,11 +30,11 @@ jobs:
       - name: Attest build provenance (SLSA L1)
         uses: actions/attest-build-provenance@v1
         with:
-          subject-path: build/release/liblibcco.a
+          subject-path: target/release/liblibcco.a
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            build/release/liblibcco.a
+            target/release/liblibcco.a
             sbom.spdx.json
