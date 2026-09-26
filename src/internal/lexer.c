@@ -164,6 +164,45 @@ cco_error_t cco_lexer_next(cco_lexer_t* lexer, cco_token_t* out_token)
         return parse_string(lexer, out_token);
     }
 
+
+    if (c == 'r' && peek(lexer) == '"')
+    {
+        advance(lexer); /* skip r */
+        advance(lexer); /* skip " */
+        if (peek(lexer) == '(') {
+            advance(lexer); /* skip ( */
+            lexer->scratch_buf.length = 0;
+            size_t start_line = lexer->line;
+            size_t start_col = lexer->col;
+            while (peek(lexer) != -1) {
+                if (peek(lexer) == ')') {
+                    int next1 = lexer->pos + 1 < lexer->src_len ? lexer->src[lexer->pos + 1] : -1;
+                    if (next1 == '"') {
+                        advance(lexer); /* skip ) */
+                        advance(lexer); /* skip " */
+                        break;
+                    }
+                }
+                char ch = (char)advance(lexer);
+                cco_strbuf_append(&lexer->scratch_buf, &ch, 1);
+            }
+            if (peek(lexer) == -1) {
+                cco_diag_record(CCO_ERR_PARSE, start_line, start_col, "parse_raw_string",
+                                "Unterminated raw string");
+                return CCO_ERR_PARSE;
+            }
+            out_token->type = CCO_TOK_STRING;
+            out_token->text_ptr = lexer->scratch_buf.data;
+            out_token->text_len = lexer->scratch_buf.length;
+            return CCO_OK;
+        } else {
+            /* Fallback or error? For now just let it fail or handle normally */
+            cco_diag_record(CCO_ERR_PARSE, lexer->line, lexer->col, "parse_raw_string",
+                            "Expected ( after r\"");
+            return CCO_ERR_PARSE;
+        }
+    }
+
     if (isalpha(c) || c == '_' || c == '$')
     {
         size_t start = lexer->pos;
@@ -176,6 +215,10 @@ cco_error_t cco_lexer_next(cco_lexer_t* lexer, cco_token_t* out_token)
         out_token->text_len = len;
 
         if (len == 4 && strncmp(out_token->text_ptr, "None", 4) == 0)
+        {
+            out_token->type = CCO_TOK_NONE;
+        }
+        else if (len == 4 && strncmp(out_token->text_ptr, "null", 4) == 0)
         {
             out_token->type = CCO_TOK_NONE;
         }

@@ -59,7 +59,8 @@ static cco_object_t* parse_map(cco_parser_context_t* ctx)
            ctx->current_token.type != CCO_TOK_RBRACKET &&
            ctx->current_token.type != CCO_TOK_EOF)
     {
-        if (ctx->current_token.type != CCO_TOK_IDENTIFIER)
+        if (ctx->current_token.type != CCO_TOK_IDENTIFIER &&
+            ctx->current_token.type != CCO_TOK_STRING)
         {
             ctx->last_error = CCO_ERR_PARSE;
             break;
@@ -263,43 +264,15 @@ static cco_object_t* parse_value(cco_parser_context_t* ctx)
             advance_token(ctx);
         break;
     case CCO_TOK_LBRACE:
-    case CCO_TOK_LBRACKET:
-        if (!ctx->options->lenient_brackets)
-        {
-            cco_diag_record(CCO_ERR_PARSE, ctx->current_token.line,
-                            ctx->current_token.col, "parse_value",
-                            "Invalid bracket. CCO strictly uses ()");
-            ctx->last_error = CCO_ERR_PARSE;
-            break;
-        }
-
-        /* Auto-correct by treating as LPAREN, but expect the matching close
-         * bracket */
-        /* We use a diagnostic info record to log the correction */
-        cco_diag_record(CCO_OK, ctx->current_token.line, ctx->current_token.col,
-                        "parse_value",
-                        "Warning: JSON-style brackets auto-corrected to ()");
-
-        cco_token_type_t expected_close =
-            (ctx->current_token.type == CCO_TOK_LBRACE) ? CCO_TOK_RBRACE
-                                                        : CCO_TOK_RBRACKET;
         advance_token(ctx);
-
-        if (ctx->current_token.type == CCO_TOK_IDENTIFIER &&
-            ctx->next_token.type == CCO_TOK_COLON)
-        {
-            result = parse_map(ctx);
-        }
-        else if (ctx->current_token.type == expected_close)
-        {
-            result = parse_map(ctx);
-        }
-        else
-        {
-            result = parse_array(ctx);
-        }
-
-        if (ctx->current_token.type == expected_close)
+        result = parse_map(ctx);
+        if (ctx->current_token.type == CCO_TOK_RBRACE)
+            advance_token(ctx);
+        break;
+    case CCO_TOK_LBRACKET:
+        advance_token(ctx);
+        result = parse_array(ctx);
+        if (ctx->current_token.type == CCO_TOK_RBRACKET)
             advance_token(ctx);
         break;
     default:

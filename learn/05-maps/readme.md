@@ -112,3 +112,5 @@ Map keys **do not need quotes** -- they are written as identifiers (letters, dig
 - Keys are identifiers, no quotes needed
 
 Next chapter -- arrays.
+
+Trailing commas are allowed: `(a: 1, b: 2,)`.

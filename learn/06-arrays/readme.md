@@ -84,3 +84,5 @@ Above, `scores` is an array where each element is a map.
 | First element `k: v` | yes | no |
 
 Next chapter -- the top-level shorthand, the most common way to write `.cco` files.
+
+Trailing commas are allowed: `(1, 2, 3,)` / `[1, 2, 3,]`.
