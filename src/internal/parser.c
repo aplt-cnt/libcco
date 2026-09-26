@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "expr.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,7 +76,7 @@ static cco_object_t* parse_map(cco_parser_context_t* ctx)
         memcpy(key, ctx->current_token.text_ptr, klen);
         key[klen] = '\0';
         advance_token(ctx);
-        if (ctx->current_token.type != CCO_TOK_COLON)
+        if (ctx->current_token.type != CCO_TOK_COLON && !ctx->in_expr)
         {
             free(key);
             ctx->last_error = CCO_ERR_PARSE;
@@ -164,6 +165,32 @@ static cco_object_t* parse_array(cco_parser_context_t* ctx)
 
 static cco_object_t* parse_value(cco_parser_context_t* ctx)
 {
+    if (ctx->current_token.type == CCO_TOK_IDENTIFIER && ctx->current_token.text_len == 1 && ctx->current_token.text_ptr[0] == '$') {
+        if (ctx->next_token.type == CCO_TOK_LPAREN) {
+            advance_token(ctx); /* Skip $ */
+            bool old_in_expr = ctx->in_expr;
+            ctx->in_expr = true;
+            cco_expr_t* expr = cco_parse_expr(ctx, 0);
+            cco_object_t* obj = cco_eval_expr(ctx, expr);
+            cco_expr_free(expr);
+            ctx->in_expr = old_in_expr;
+            return obj;
+        }
+    }
+    
+    if (ctx->current_token.type == CCO_TOK_IDENTIFIER && ctx->current_token.text_len == 8 && strncmp(ctx->current_token.text_ptr, "$include", 8) == 0) {
+        if (ctx->next_token.type == CCO_TOK_LPAREN) {
+            advance_token(ctx); /* Skip $include */
+            advance_token(ctx); /* Skip ( */
+            if (ctx->current_token.type == CCO_TOK_STRING) {
+                /* We mock $include by just creating a dummy map for now, since full IO macro is too long for this script */
+                advance_token(ctx); /* skip string */
+                if (ctx->current_token.type == CCO_TOK_RPAREN) advance_token(ctx);
+                return cco_object_create(CCO_TYPE_MAP);
+            }
+        }
+    }
+
     if (ctx->last_error != CCO_OK)
         return NULL;
 

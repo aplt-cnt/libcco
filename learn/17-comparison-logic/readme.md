@@ -16,16 +16,16 @@ After this chapter you will be able to use comparison and logical operators in C
 Results are boolean values `true` or `false`:
 
 ```cco
-    a: $(10 == 10),   /* NOTE: true */
-    b: $(10 != 5),    /* NOTE: true */
-    c: $(3 > 10)      /* NOTE: false */
+a: $(10 == 10),   /* NOTE: true */
+b: $(10 != 5),    /* NOTE: true */
+c: $(3 > 10)      /* NOTE: false */
 
-    both:  $(true && true),       /* NOTE: true */
-    either: $(true || false),      /* NOTE: true */
-    not_it: $(!false)              /* NOTE: true */
+both:  $(true && true),       /* NOTE: true */
+either: $(true || false),     /* NOTE: true */
+not_it: $(!false)             /* NOTE: true */
 
-    result: $($(10 > 5) && $(3 < 10)),   /* NOTE: true && true = true */
-    result: $($(10 == 10) || $(5 == 3))  /* NOTE: true || false = true */
+result: $($(10 > 5) && $(3 < 10)),   /* NOTE: true && true = true */
+result: $($(10 == 10) || $(5 == 3))  /* NOTE: true || false = true */
 ```
 
 ## 17.4 Common Mistakes
@@ -40,10 +40,19 @@ a: $("hello" == "world")   /* may not work as expected */
 
 > Current CCO comparison operators mainly support numeric types (Integer and Float).
 
-## 17.5 Summary
+## 17.5 Ternary Operator
+
+You can also use the ternary operator `? :` for simple conditional logic:
+
+```cco
+status: $(is_active ? "online" : "offline")
+```
+
+## 17.6 Summary
 
 - Comparison: `==` `!=` `<` `>` `<=` `>=`
 - Logical: `&&` `||` `!`
+- Ternary Operator: `? :`
 - Results are always boolean
 
 Next chapter -- the coalescing operator.

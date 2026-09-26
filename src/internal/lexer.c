@@ -206,7 +206,7 @@ cco_error_t cco_lexer_next(cco_lexer_t* lexer, cco_token_t* out_token)
     if (isalpha(c) || c == '_' || c == '$')
     {
         size_t start = lexer->pos;
-        while (isalnum(peek(lexer)) || peek(lexer) == '_' || peek(lexer) == '-')
+        while (isalnum(peek(lexer)) || peek(lexer) == '_' || peek(lexer) == '-' || peek(lexer) == '$')
         {
             advance(lexer);
         }
@@ -280,6 +280,13 @@ cco_error_t cco_lexer_next(cco_lexer_t* lexer, cco_token_t* out_token)
     case ',':
         out_token->type = CCO_TOK_COMMA;
         break;
+
+    case '?':
+        if (peek(lexer) == '?') { advance(lexer); out_token->type = CCO_TOK_QQ; out_token->text_len = 2; }
+        else out_token->type = CCO_TOK_QMARK;
+        break;
+    case '~': out_token->type = CCO_TOK_TILDE; break;
+    case '^': out_token->type = CCO_TOK_CARET; break;
     case '+':
         out_token->type = CCO_TOK_PLUS;
         break;
@@ -287,7 +294,8 @@ cco_error_t cco_lexer_next(cco_lexer_t* lexer, cco_token_t* out_token)
         out_token->type = CCO_TOK_MINUS;
         break;
     case '*':
-        out_token->type = CCO_TOK_STAR;
+        if (peek(lexer) == '*') { advance(lexer); out_token->type = CCO_TOK_STARSTAR; out_token->text_len = 2; }
+        else out_token->type = CCO_TOK_STAR;
         break;
     case '/':
         out_token->type = CCO_TOK_SLASH;
@@ -341,9 +349,7 @@ cco_error_t cco_lexer_next(cco_lexer_t* lexer, cco_token_t* out_token)
         }
         else
         {
-            cco_diag_record(CCO_ERR_INVALID_ARG, lexer->line, lexer->col,
-                            "cco_lexer_next", "Invalid token");
-            return CCO_ERR_INVALID_ARG;
+            out_token->type = CCO_TOK_AMPERSAND;
         }
         break;
     case '|':
@@ -357,7 +363,19 @@ cco_error_t cco_lexer_next(cco_lexer_t* lexer, cco_token_t* out_token)
             out_token->type = CCO_TOK_PIPE;
         break;
     case '.':
-        out_token->type = CCO_TOK_DOT;
+        if (peek(lexer) == '.') {
+            advance(lexer);
+            if (peek(lexer) == '=') {
+                advance(lexer);
+                out_token->type = CCO_TOK_DOTDOTEQ;
+                out_token->text_len = 3;
+            } else {
+                out_token->type = CCO_TOK_DOTDOT;
+                out_token->text_len = 2;
+            }
+        } else {
+            out_token->type = CCO_TOK_DOT;
+        }
         break;
     case '#':
         out_token->type = CCO_TOK_HASH;

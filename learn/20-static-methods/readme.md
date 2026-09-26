@@ -65,7 +65,7 @@ $function.#compute<a: Integer, b: Integer>: Integer (
 
 ```cco
 $function.#max<a: Integer, b: Integer>: Integer (
-    $return<Integer>($($(a > b) | a) && $(a | b)))
+    $return<Integer>($(a > b ? a : b))
 )
 ```
 

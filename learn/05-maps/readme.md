@@ -15,7 +15,7 @@ This is actually a shorthand (detailed in Chapter 7). The full form is:
 (name: "libcco", version: 1)
 ```
 
-Wrapped in parentheses `()`, with `key: value` pairs separated by commas -- this is CCO's **map** (also called a dictionary or object).
+Wrapped in parentheses `()` or braces `{}`, with `key: value` pairs separated by commas -- this is CCO's **map** (also called a dictionary or object).
 
 ## 5.2 What a Map Looks Like
 
@@ -28,11 +28,11 @@ person: (
 )
 ```
 
-Outer parentheses `(...)` enclose comma-separated key-value pairs.
+Outer parentheses `(...)` or braces `{...}` enclose comma-separated key-value pairs.
 
 ## 5.3 Empty Map
 
-An empty `()` is an empty map:
+An empty `()` or `{}` is an empty map:
 
 ```cco
 empty_object: ()
@@ -92,9 +92,14 @@ mixed: (
 (name: "Alice", age: 30)
 ```
 
-## 5.7 Keys Are Identifiers
+## 5.7 Keys Can Be Identifiers or Strings
 
-Map keys **do not need quotes** -- they are written as identifiers (letters, digits, underscores; must not start with a digit).
+Map keys can be written as identifiers (letters, digits, underscores; must not start with a digit) without quotes, or as quoted strings.
+
+```cco
+/* NOTE: valid keys */
+(name: 1, _count: 2, "content-type": 3)
+```
 
 ```cco
 /* NOTE: valid keys */

@@ -1,6 +1,6 @@
 # libcco Developer Quick Start Guide (Quick Start)
 
-Welcome to `libcco`! This is a high-performance, crash-proof, dynamic AST configuration parsing engine written in pure C11. The CCO (Config & Command Object) syntax abandons the `{}` and `[]` found in traditional JSON/HOCON, **wrapping everything in `()`**, and intelligently infers types through key-value pair topology.
+Welcome to `libcco`! This is a high-performance, crash-proof, dynamic AST configuration parsing engine written in pure C11. 
 
 This document will quickly get you up to speed on the core integration and development practices of `libcco`.
 

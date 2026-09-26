@@ -29,21 +29,43 @@ result: $(10 + 20)
 | `*` | multiplication | `$(6 * 7)` | 42 |
 | `/` | division | `$(10 / 3)` | 3 (integer) |
 
-## 16.4 Operator Precedence
+## 16.4 Power and Bitwise Operators
 
-Multiplication and division take precedence over addition and subtraction (as in math):
+CCO also supports the power operator `**` and bitwise operators `|`, `&`, `^`, `~`:
 
 ```cco
-    result: $(10 + 20 * 3)    /* NOTE: = 10 + 60 = 70 */
-
-    result: $($(10 + 20) * 3)  /* NOTE: = 30 * 3 = 90 */
-
-    a: $(10 + 20),          /* NOTE: 30 (integer) */
-    b: $(10.5 + 20),        /* NOTE: 30.5 (float) */
-    c: $(1.5 * 2)           /* NOTE: 3.0 (float) */
+a: $(2 ** 3),      /* NOTE: 8 */
+b: $(3 | 5),       /* NOTE: bitwise OR, 7 */
+c: $(~0)           /* NOTE: bitwise NOT */
 ```
 
+## 16.5 Operator Precedence
+
+Expressions are evaluated strictly according to the following precedence levels (from highest to lowest):
+
+1. **Unary**: `+` `-` `!` `~`
+2. **Power**: `**` (Right-associative)
+3. **Multiplication/Division**: `*` `/`
+4. **Addition/Subtraction**: `+` `-`
+5. **Ranges**: `..` `..=`
+6. **Coalesce**: `??`
+7. **Comparison**: `<` `<=` `>` `>=`
+8. **Equality**: `==` `!=`
+9. **Bitwise AND**: `&`
+10. **Bitwise XOR**: `^`
+11. **Bitwise OR**: `|`
+12. **Logical AND**: `&&`
+13. **Ternary**: `? :` (Right-associative)
+14. **Logical OR**: `||`
+
+You can always use nested `$(...)` to force a specific evaluation order.
+
 If either operand is float, the result is float.
+
+```cco
+A: $(10 + 20 * 3)    /* NOTE: = 10 + 60 = 70 */
+B: $($(10 + 20) * 3) /* NOTE: = 30 * 3 = 90 */
+```
 
 ## 16.6 Where Can Expressions Be Used?
 
@@ -57,8 +79,9 @@ For evaluation, the C API (`cco_expr_eval`) is used.
 ## 16.7 Summary
 
 - `$(expression)` marks an expression
-- Supports `+` `-` `*` `/`
+- Supports `+` `-` `*` `/` `**` `|` `&` `^` `~`
 - Multiplication/division before addition/subtraction
 - Nested `$(...)` changes precedence
 
 Next chapter -- comparison and logical operators.
+

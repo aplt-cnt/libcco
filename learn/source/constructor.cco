@@ -26,7 +26,7 @@ $temp.FeatureToggle: (
 ),
 
 $function.@<name: String, enabled: Boolean>: (
-    $this.(name: name, enabled: enabled, level: $(enabled | 1))
+    $this.(name: name, enabled: enabled, level: $(enabled ?? 1))
 ),
 
 /* NOTE: instantiation */

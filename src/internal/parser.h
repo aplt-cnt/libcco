@@ -18,6 +18,7 @@ typedef struct cco_parser_context_s
 
     cco_error_t last_error;
     bool recovery_mode;
+    bool in_expr;
 
 } cco_parser_context_t;
 

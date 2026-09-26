@@ -9,6 +9,7 @@ extern void test_arena(void);
 extern void test_strbuf(void);
 extern void test_lexer(void);
 extern void test_parser(void);
+extern void test_expr(void);
 
 int main(void) {
     printf("Starting libcco unit tests...\n");
@@ -17,6 +18,7 @@ int main(void) {
     test_strbuf();
     test_lexer();
     test_parser();
+    test_expr();
 
     printf("========================================\n");
     printf("Tests run:    %d\n", tests_run);

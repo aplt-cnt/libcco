@@ -32,7 +32,7 @@ unit_tests: dirs $(UNIT_BIN)
 	@$(UNIT_BIN)
 
 $(UNIT_BIN): $(TARGET_DIR)/test_main.o $(UNIT_OBJS) $(LIBCCO)
-	$(CC) $(CFLAGS) $(OPT) $^ -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) $(OPT) $^ -o $@ -lm $(LDFLAGS)
 
 integration_tests: dirs $(INTEG_BIN)
 	@echo "==> Running integration tests..."
@@ -52,17 +52,18 @@ integration_tests: dirs $(INTEG_BIN)
 	if [ $$failed -ne 0 ]; then exit 1; fi
 
 $(INTEG_BIN): $(INTEG_OBJ) $(LIBCCO)
-	$(CC) $(CFLAGS) $(OPT) $^ -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) $(OPT) $^ -o $@ -lm $(LDFLAGS)
 
 fuzz_tests: dirs $(FUZZ_BIN)
 	@echo "==> Running fuzzer (limited runs)..."
 	@if [ -x $(FUZZ_BIN) ]; then $(FUZZ_BIN) -runs=10000; else echo "Fuzzer not built."; fi
 
 $(FUZZ_BIN): $(FUZZ_OBJS) $(LIBCCO)
-	$(CC) $(CFLAGS) $(OPT) $^ -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) $(OPT) $^ -o $@ -lm $(LDFLAGS)
 
 $(TARGET_DIR)/%.o: %.c | dirs
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(OPT) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(OPT) -c $< -o $@ -lm
 
 clean:
 	rm -rf $(TARGET_DIR)
+obj/test_expr.o: unit/test_expr.c

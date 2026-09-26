@@ -1,5 +1,7 @@
 # Chapter 22: Complete Grammar Reference
 
+> If you don't need to know the grammar definition, you can skip it.
+
 This is the full CCO grammar specification in EBNF-like notation. Useful for quick reference.
 
 ## 22.1 File Structure
@@ -104,7 +106,6 @@ Param      ::= Identifier ":" TypeExpr | "_$" digits ":" TypeExpr
 
 Signature  ::= [ParamsThen] [":" TypeExpr | "->" TypeExpr]     (sugar, may be empty)
 ParamsThen ::= "<" ParamList ">" | ":" "(" ParamList ")" | "(" ParamList ")"
-```
 
 Body       ::= (Stmt ("," Stmt)* ","?)? [Expr]
 Stmt       ::= Bind | Assign | Return | ExprStmt
@@ -144,22 +145,25 @@ Additions:
 ## 22.8 Expressions
 
 ```
-Expr       ::= LiteralExpr | Identifier | "$this"
+Expr       ::= LiteralExpr | ArrayLiteral | MapLiteral | Identifier | "$this"
              | "(" Expr ")"               (compound $)
              | OpExpr
              | CallExpr
 
 OpExpr     ::= Expr BinaryOp Expr
              | UnaryOp Expr
-             | Expr "|" Expr              (coalesce)
+             | Expr "??" Expr             (coalesce)
+             | Expr "?" Expr ":" Expr     (ternary)
 
-BinaryOp   ::= "+" | "-" | "*" | "/"
+BinaryOp   ::= "+" | "-" | "*" | "/" | "**"
              | "==" | "!=" | "<" | ">" | "<=" | ">="
              | "&&" | "||"
+             | "|" | "&" | "^"
 
-UnaryOp    ::= "!"
+UnaryOp    ::= "!" | "~"
 
 CallExpr   ::= "$format" "(" Expr ")"
+             | "$include" "(" StringLiteral ")"                     (merge)
              | "#" Identifier "(" Args ")"                           (instantiate)
              | "#" Identifier "(." Field ":" Value ("," Field ":")* ")"  (named inst)
              | "#" Identifier ":" Identifier "(" Args ")"           (static call via #)

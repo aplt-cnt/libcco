@@ -2,9 +2,14 @@
 
 After this chapter you will be able to write arrays and understand the difference between maps and arrays.
 
-## 6.1 Arrays Also Use `()`
+## 6.1 Arrays Use `()` or `[]`
 
-Yes -- CCO arrays **also** use parentheses:
+CCO arrays can use traditional parentheses or standard brackets:
+
+```cco
+/* NOTE: an array of numbers */
+numbers: [1, 2, 3, 4, 5]
+```
 
 ```cco
 /* NOTE: an array of numbers */
@@ -15,7 +20,7 @@ numbers: (1, 2, 3, 4, 5)
 
 Here is the rule you need to remember:
 
-> If the **first element** inside `(...)` is a `key: value` pair, it is a map. Otherwise it is an array.
+> If you use `[]` it is always an array. If you use `{}` it is always a map. If you use `()`, and the **first element** is a `key: value` pair, it is a map. Otherwise it is an array.
 
 | Writing | First Element | Result |
 |---------|--------------|--------|
@@ -74,7 +79,17 @@ scores: (
 
 Above, `scores` is an array where each element is a map.
 
-## 6.6 Summary
+## 6.7 Ranges
+
+Generate arrays up to 10000 elements dynamically using `..` (half-open) or `..=` (inclusive):
+
+```cco
+[1..10]    /* 1 to 9 */
+[1..=10]   /* 1 to 10 */
+[10..1]    /* 10 down to 2 */
+```
+
+## 6.8 Summary
 
 | | Map | Array |
 |---|-----|-------|
